@@ -1,0 +1,6 @@
+{
+  "name": "Nghề Cơ Khí 3D",
+  "description": "Bài thuyết trình 3D tương tác giới thiệu các nghề trong lĩnh vực cơ khí dành cho học sinh trung học cơ sở Việt Nam.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,19 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Downloaded model cache (regenerate with `node tools/fetch-models.mjs`)
+tools/.cache/
+
+# Byte-identical duplicate of 3D models/Biycle_Pacific_Invert_6.0
+/Biycle_Pacific_Invert_6.0/
+
+# Vite / editor
+.vite/
+.idea/
+.vscode/

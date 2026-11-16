@@ -1,0 +1,2081 @@
+
+
+
+
+# TASK: Vietnamese Mechanical Careers — Cinematic 3D Web Presentation
+
+## OBJECTIVE
+
+Build a **cinematic, 3D-driven, playful-yet-premium web presentation** about:
+
+**GIỚI THIỆU CÁC NGHỀ TRONG LĨNH VỰC CƠ KHÍ**
+
+| Parameter | Value |
+|---|---|
+| Audience | Vietnamese middle-school students, ages 12–15 |
+| Language | 100 % Vietnamese — headings, body, labels, tooltips, buttons, error states |
+| Slide count | 23 slides |
+| Format | Single-page web app, vanilla HTML + CSS + JS + Three.js via CDN |
+| Aspect ratio | 16 : 9 (1920 × 1080 reference) |
+| Deployment | Static files — works from `file://`, any web server, GitHub Pages, Vercel, Netlify |
+| Offline | Must work offline after first load — all assets embedded or cached |
+
+This should feel like **if Duolingo's design team collaborated with Apple's product-page engineers to teach Vietnamese 13-year-olds about mechanical careers.** Warm, playful, premium, surprisingly delightful — never childish, never corporate.
+
+---
+
+# 1. DESIGN SOUL
+
+### 1A. The Feeling
+
+| Word | What it means here |
+|---|---|
+| **Playful** | Objects bounce softly on entrance. Gears wobble when hovered. Numbers count up with spring overshoot. Tooltips appear with a little pop. Nothing is stiff or rigid. |
+| **Light** | The page breathes. Backgrounds are creamy and airy. Shadows are soft and wide. Nothing feels heavy or dense. |
+| **Warm** | Every color leans toward yellow/orange undertones. Metals are gold-ish. Shadows are warm brown, never blue-gray. Lighting is "golden hour in a clean workshop." |
+| **Premium** | Typography is precise. Spacing is generous. Details are polished (rounded corners, consistent radii, considered icon sizes). Nothing looks rushed. |
+| **Trustworthy** | Real industrial photographs. Accurate Vietnamese. No exaggerated claims. Real 3D models of real machines. |
+
+### 1B. What This Is NOT
+
+- ❌ Dark-mode tech demo (too intimidating for 13-year-olds)
+- ❌ Pastel kawaii cartoon (too young — students are 12–15, not 6)
+- ❌ Corporate annual report (boring)
+- ❌ AI-generated template (soulless)
+- ❌ Bootstrap landing page (generic)
+- ❌ Single-color monochrome (lifeless)
+- ❌ Neon/cyberpunk (distracting, cold)
+- ❌ Full of meaningless 3D decorations (every 3D object must teach something)
+
+### 1C. Layout Philosophy
+
+Every slide follows the **"one idea, one hero, one action"** rule:
+
+- **One idea:** A single concept the student should remember.
+- **One hero:** A dominant visual element (3D model, photo, diagram) that occupies 50–70% of the slide.
+- **One action:** Something the student can do (hover a part, click to explode, drag to rotate) or passively experience (camera orbit, count-up animation).
+
+**Layout variety is mandatory.** The 23 slides use at least 10 distinct layout archetypes. No two consecutive slides share the same structure.
+
+| Archetype | Used in slides (suggested) |
+|---|---|
+| Full-bleed 3D + text overlay | 01, 10, 16, 23 |
+| Split: 3D left, text right | 03, 07, 14 |
+| Split: text left, 3D right | 09, 22 |
+| Full-bleed 3D + floating cards | 04, 06 |
+| Top strip (photo/3D) + text bottom | 08, 13 |
+| Centered 3D + surrounding labels | 05, 12, 15, 21 |
+| 2×2 or 2×3 grid | 18, 19, 20 |
+| Pull-quote + small visual | 02 |
+| Diagonal composition | 11 |
+| Minimal: centered text + small accent | 23 |
+
+---
+
+# 2. COLOR SYSTEM — "GOLDEN HOUR IN A CLEAN WORKSHOP"
+
+### 2A. Design Intent
+
+The palette should feel like **late-afternoon sun streaming through the windows of a spotless modern workshop.** Everything is warm, glowing, optimistic.
+
+You have creative freedom to adjust shades per slide. These are the **family of colors**, not a rigid system. The only hard rule: **everything stays warm.**
+
+### 2B. Full Token Library
+
+```css
+:root {
+  /* ═══════════ SURFACES ═══════════ */
+  --bg-cream:         #FFF9F2;     /* primary canvas — warm cream */
+  --bg-linen:         #F5EDE3;     /* secondary sections — soft linen */
+  --bg-peach:         #FCEEE4;     /* subtle warm blush tint — accent sections */
+  --bg-card:          #FFFFFF;     /* cards — clean white */
+  --bg-warm-dark:     #3D3028;     /* warm espresso — dark hero sections */
+  --bg-warm-dark-alt: #4A3F35;     /* slightly lighter — dark layering */
+
+  /* ═══════════ TEXT ═══════════ */
+  --text-heading:     #2D2520;     /* warm near-black — headlines */
+  --text-body:        #5C534B;     /* warm dark gray — body text */
+  --text-soft:        #9A9088;     /* warm medium gray — captions */
+  --text-on-dark:     #FFF5ED;     /* warm off-white on dark bg */
+  --text-link:        #D4734F;     /* clickable text — warm coral */
+
+  /* ═══════════ ACCENTS (playful, warm family) ═══════════ */
+  --coral:            #E87B5A;     /* primary CTA, key highlights — friendly energy */
+  --tangerine:        #F2994A;     /* stat numbers, badges — joyful warmth */
+  --honey:            #EAB042;     /* progress bars, active states — golden */
+  --sage:             #7DB58E;     /* skills, safety, growth — calm nature */
+  --sky:              #6AADCF;     /* technology, precision, data — gentle blue */
+  --lavender:         #A78EC4;     /* robotics, future, innovation — playful purple */
+  --rose:             #D4918D;     /* quotes, emphasis — soft pink */
+  --mint:             #82C9B5;     /* mechatronics, electronics — fresh green */
+
+  /* ═══════════ 3D SCENE ═══════════ */
+  --metal-warm:       #D4C8B8;     /* base metal color in 3D */
+  --metal-gold:       #C9A96E;     /* golden accent for hero parts */
+  --metal-copper:     #B87D5C;     /* warm copper for secondary parts */
+  --scene-ambient:    #F5E8D8;     /* ambient light color */
+  --scene-key-light:  #FFF0DC;     /* key light — golden */
+  --scene-fill-light: #DDE8F0;     /* fill light — gentle cool balance */
+  --scene-rim-light:  #E8775A;     /* rim light — warm edge glow */
+  --scene-shadow:     #3D3028;     /* shadow color — warm brown */
+
+  /* ═══════════ UTILITY ═══════════ */
+  --border:           rgba(45, 37, 32, 0.08);
+  --border-card:      rgba(45, 37, 32, 0.06);
+  --shadow-xs:        0 1px 2px rgba(45, 37, 32, 0.04);
+  --shadow-sm:        0 2px 8px rgba(45, 37, 32, 0.05);
+  --shadow-md:        0 4px 24px rgba(45, 37, 32, 0.07);
+  --shadow-lg:        0 12px 48px rgba(45, 37, 32, 0.09);
+  --shadow-xl:        0 24px 80px rgba(45, 37, 32, 0.12);
+  --shadow-3d:        0 30px 100px rgba(45, 37, 32, 0.15);
+  --shadow-glow-coral: 0 8px 32px rgba(232, 123, 90, 0.25);
+
+  --radius-xs:        6px;
+  --radius-sm:        10px;
+  --radius-md:        16px;
+  --radius-lg:        24px;
+  --radius-xl:        32px;
+  --radius-full:      9999px;
+
+  /* ═══════════ ANIMATION ═══════════ */
+  --ease-out:         cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring:      cubic-bezier(0.34, 1.56, 0.64, 1);      /* playful overshoot */
+  --ease-smooth:      cubic-bezier(0.45, 0, 0.15, 1);
+  --duration-fast:    0.3s;
+  --duration-normal:  0.5s;
+  --duration-slow:    0.7s;
+  --duration-morph:   0.65s;
+  --duration-3d:      1.0s;
+}
+```
+
+### 2C. Per-Slide Accent Guide (creative suggestions, not rigid)
+
+| Slide | Primary Accent | Secondary | Why |
+|---|---|---|---|
+| 01 Cover | coral | honey | Warm welcome |
+| 02 Opening | rose | — | Soft quote |
+| 03 What is MechE? | honey | tangerine | Golden gears |
+| 04 Everyday | tangerine | sky | Diverse |
+| 05 Process | coral | honey | Flow energy |
+| 06 Career map | All 6 accents | — | Diversity showcase |
+| 07 Engineer | sky | — | Technical calm |
+| 08 Machining | coral | tangerine | Metal warmth |
+| 09 CNC | sky | lavender | Digital precision |
+| 10 Welder | tangerine | honey | Sparks glow |
+| 11 Sheet metal | coral | — | Industrial |
+| 12 Assembly | sage | — | Growth, precision |
+| 13 Maintenance | sage | sky | Reliable |
+| 14 Automotive | coral | tangerine | Energetic |
+| 15 Quality | sky | — | Precision |
+| 16 Robotics | lavender | — | Innovation |
+| 17 Mechatronics | mint | lavender | Fusion |
+| 18 Comparison | coral + sky + sage | — | Color-coded cards |
+| 19 Workplaces | honey | — | Warm panorama |
+| 20 Tools | sky | coral | Technical |
+| 21 Skills | sage | mint | Growth |
+| 22 Future | lavender | honey | Aspiration |
+| 23 Conclusion | coral | — | Callback warmth |
+
+---
+
+# 3. TYPOGRAPHY — READABLE, FRIENDLY, PRECISE
+
+### 3A. Font Loading
+
+Use Google Fonts CDN (static files, offline-cacheable):
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+```
+
+### 3B. Complete Type Scale
+
+```css
+/* ═══════════ TYPOGRAPHY ═══════════ */
+.t-hero {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(48px, 5vw, 88px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text-heading);
+}
+
+.t-slide-title {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: clamp(28px, 3vw, 48px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--text-heading);
+}
+
+.t-section {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: clamp(20px, 2vw, 30px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text-heading);
+}
+
+.t-body-large {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: clamp(17px, 1.3vw, 22px);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--text-body);
+  max-width: 560px;  /* ≈ 60 characters */
+}
+
+.t-body {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: clamp(15px, 1.1vw, 18px);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-body);
+}
+
+.t-caption {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: clamp(11px, 0.8vw, 14px);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-soft);
+}
+
+.t-eyebrow {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: clamp(10px, 0.7vw, 13px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  /* color set per slide — uses accent */
+}
+
+.t-stat {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: clamp(40px, 4.5vw, 80px);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  /* color set per stat — uses accent */
+}
+
+.t-label-3d {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-heading);
+  background: rgba(255,255,255,0.92);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.t-button {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+```
+
+### 3C. Vietnamese Content Rules
+
+- **Tone:** Fun, knowledgeable older sibling. Never textbook-stiff.
+- **Sentence length:** Max 18 words. Average 12.
+- **Voice:** Active always. "Thợ hàn nối các tấm kim loại" not "Các tấm kim loại được nối bởi thợ hàn."
+- **Jargon protocol:** First use has Vietnamese parenthetical. `CNC (điều khiển số bằng máy tính)`. After: `CNC` alone.
+- **Warmth moments:** Occasionally use "Em biết không?", "Thú vị đúng không?", "Hãy tưởng tượng..." — max 1 per 3 slides.
+- **No exaggeration:** "Nhu cầu tuyển dụng ổn định" not "lương cực cao."
+- **Consistent terminology:** "máy CNC" everywhere. "thợ hàn" everywhere. Never mix.
+
+---
+
+# 4. TECHNOLOGY — VANILLA + THREE.JS CDN
+
+### 4A. Stack (No Build Tools Required)
+
+```
+index.html          ← single-page app
+├── css/
+│   ├── reset.css
+│   ├── variables.css
+│   ├── typography.css
+│   ├── layout.css
+│   ├── components.css
+│   ├── slides.css
+│   └── animations.css
+├── js/
+│   ├── app.js              ← main orchestrator
+│   ├── router.js           ← slide navigation
+│   ├── transitions.js      ← slide transition animations
+│   ├── three-manager.js    ← Three.js scene lifecycle
+│   ├── scenes/
+│   │   ├── gear-hero.js
+│   │   ├── bicycle-gear.js
+│   │   ├── gear-assembly.js
+│   │   ├── everyday-objects.js
+│   │   ├── process-gears.js
+│   │   ├── career-map-3d.js
+│   │   ├── cad-wireframe.js
+│   │   ├── lathe.js
+│   │   ├── cnc-mill.js
+│   │   ├── welding-sparks.js
+│   │   ├── sheet-metal-bend.js
+│   │   ├── exploded-assembly.js
+│   │   ├── maintenance-tools.js
+│   │   ├── engine-cutaway.js
+│   │   ├── caliper.js
+│   │   ├── robot-arm.js
+│   │   ├── mechatronics.js
+│   │   ├── comparison-objects.js
+│   │   ├── factory-particles.js
+│   │   ├── tools-grid.js
+│   │   ├── hex-skills.js
+│   │   ├── future-scene.js
+│   │   └── finale.js
+│   ├── utils/
+│   │   ├── warm-lighting.js
+│   │   ├── camera-rig.js
+│   │   ├── explode-controller.js
+│   │   ├── label-manager.js
+│   │   ├── counter-animation.js
+│   │   └── device-tier.js
+│   └── data/
+│       ├── slides-content.js    ← all Vietnamese text
+│       └── scene-configs.js     ← 3D scene parameters
+├── models/                      ← GLB files (Draco compressed)
+├── images/                      ← optimized WebP photos
+├── graphics/                    ← SVG diagrams
+└── fonts/                       ← woff2 fallbacks (offline)
+```
+
+### 4B. Three.js CDN Setup
+
+```html
+<!-- index.html <head> -->
+<script type="importmap">
+{
+  "imports": {
+    "three":              "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+    "three/addons/":      "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/",
+    "three/nodes":        "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/nodes/Nodes.js"
+  }
+}
+</script>
+
+<!-- Preload critical models -->
+<link rel="preload" href="models/gear-spur.glb" as="fetch" crossorigin>
+<link rel="preload" href="models/gear-assembly.glb" as="fetch" crossorigin>
+```
+
+```javascript
+// js/three-manager.js
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+export class ThreeManager {
+  constructor() {
+    this.scenes = new Map();
+    this.activeScene = null;
+    this.clock = new THREE.Clock();
+
+    // Shared resources
+    this.dracoLoader = new DRACOLoader();
+    this.dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/libs/draco/');
+    this.gltfLoader = new GLTFLoader();
+    this.gltfLoader.setDRACOLoader(this.dracoLoader);
+    this.textureLoader = new THREE.TextureLoader();
+
+    // Shared renderer
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
+    });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setSize(1920, 1080);
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.VSMShadowMap;
+
+    // CSS2D renderer for Vietnamese labels
+    this.labelRenderer = new CSS2DRenderer();
+    this.labelRenderer.setSize(1920, 1080);
+    this.labelRenderer.domElement.style.position = 'absolute';
+    this.labelRenderer.domElement.style.top = '0';
+    this.labelRenderer.domElement.style.pointerEvents = 'none';
+
+    // Shared model cache
+    this.modelCache = new Map();
+  }
+
+  async loadModel(path) {
+    if (this.modelCache.has(path)) return this.modelCache.get(path).clone();
+    const gltf = await this.gltfLoader.loadAsync(path);
+    this.modelCache.set(path, gltf.scene);
+    return gltf.scene.clone();
+  }
+
+  createScene(id, config) {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      config.fov || 35,
+      1920 / 1080,
+      0.1,
+      100
+    );
+    camera.position.set(...(config.cameraPos || [4, 2, 6]));
+
+    // Attach warm lighting
+    this.addWarmLighting(scene, config);
+
+    // Store
+    this.scenes.set(id, { scene, camera, config, objects: {}, mixers: [], update: null });
+    return this.scenes.get(id);
+  }
+
+  addWarmLighting(scene, config = {}) {
+    // Ambient — warm base
+    const ambient = new THREE.AmbientLight(0xF5E8D8, config.ambientIntensity || 0.45);
+    scene.add(ambient);
+
+    // Key light — golden sun
+    const key = new THREE.DirectionalLight(0xFFF0DC, config.keyIntensity || 1.8);
+    key.position.set(5, 8, 4);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 0.5;
+    key.shadow.camera.far = 20;
+    key.shadow.camera.left = -5;
+    key.shadow.camera.right = 5;
+    key.shadow.camera.top = 5;
+    key.shadow.camera.bottom = -5;
+    key.shadow.bias = -0.0001;
+    key.shadow.radius = 4;
+    scene.add(key);
+
+    // Fill — gentle cool
+    const fill = new THREE.DirectionalLight(0xDDE8F0, config.fillIntensity || 0.5);
+    fill.position.set(-4, 3, -3);
+    scene.add(fill);
+
+    // Rim — warm coral edge
+    const rim = new THREE.DirectionalLight(0xE8775A, config.rimIntensity || 0.3);
+    rim.position.set(0, -1, -4);
+    scene.add(rim);
+
+    // Ground plane for contact shadow
+    const shadowGeo = new THREE.PlaneGeometry(20, 20);
+    const shadowMat = new THREE.ShadowMaterial({
+      opacity: 0.15,
+      color: new THREE.Color(0x3D3028),
+    });
+    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.y = config.groundY || -1.2;
+    shadowPlane.receiveShadow = true;
+    scene.add(shadowPlane);
+  }
+
+  // ... transition, animate, dispose methods
+}
+```
+
+### 4C. Shared Material Library
+
+```javascript
+// js/utils/warm-materials.js
+import * as THREE from 'three';
+
+export const WarmMetal = () => new THREE.MeshStandardMaterial({
+  color: 0xD4C8B8,
+  metalness: 0.75,
+  roughness: 0.42,
+});
+
+export const GoldenMetal = () => new THREE.MeshStandardMaterial({
+  color: 0xC9A96E,
+  metalness: 0.82,
+  roughness: 0.35,
+});
+
+export const CopperMetal = () => new THREE.MeshStandardMaterial({
+  color: 0xB87D5C,
+  metalness: 0.78,
+  roughness: 0.38,
+});
+
+export const MatteSteel = () => new THREE.MeshStandardMaterial({
+  color: 0xA8A09A,
+  metalness: 0.65,
+  roughness: 0.55,
+});
+
+export const SoftPlastic = (color = 0x7DB58E) => new THREE.MeshStandardMaterial({
+  color,
+  metalness: 0.05,
+  roughness: 0.7,
+});
+
+export const WarmGlass = () => new THREE.MeshPhysicalMaterial({
+  color: 0xFFF5ED,
+  metalness: 0.0,
+  roughness: 0.05,
+  transmission: 0.92,
+  thickness: 0.5,
+  ior: 1.45,
+});
+```
+
+---
+
+# 5. 3D MODEL UNIVERSE
+
+### 5A. Complete Asset Library (22 objects)
+
+| # | Object | Complexity | Poly Target | File Size Target | Source Strategy | Used in Slides |
+|---|---|---|---|---|---|---|
+| 01 | Spur gear (hero, detailed) | Medium | 8K tris | 45 KB | Sketchfab CC0 or procedural | 01, 03, 06, 20, 23 |
+| 02 | Gear assembly (3 meshing gears) | Medium | 20K tris | 85 KB | Composed from #01 | 03, 05, 23 |
+| 03 | Bicycle wheel segment + chain | Medium | 15K tris | 70 KB | Sketchfab CC-BY | 02, 04 |
+| 04 | Electric fan (simple) | Low | 5K tris | 30 KB | Procedural | 04 |
+| 05 | Car dashboard gauge cluster | Low | 6K tris | 35 KB | Procedural | 04 |
+| 06 | Kitchen mixer (simple) | Low | 5K tris | 30 KB | Poly Pizza CC0 | 04 |
+| 07 | Process arrow connector (curved) | Low | 1K tris | 10 KB | Procedural | 05 |
+| 08 | Career cluster sphere | Low | 2K tris | 8 KB | Procedural | 06 |
+| 09 | CAD wireframe gear overlay | Low | 3K tris | 12 KB | Procedural (wireframe edges) | 07 |
+| 10 | Lathe machine (simplified) | High | 25K tris | 130 KB | Sketchfab CC0 | 08 |
+| 11 | CNC 3-axis mill (simplified) | High | 30K tris | 180 KB | Sketchfab CC0 | 09, 20 |
+| 12 | Welding torch + nozzle | Low | 4K tris | 25 KB | Sketchfab CC0 | 10, 20 |
+| 13 | Sheet metal panel (flat, bendable) | Low | 2K tris | 10 KB | Procedural (morph targets) | 11, 12 |
+| 14 | Assembly cube (5 separable parts) | Medium | 15K tris | 90 KB | Composed or Sketchfab | 12, 18 |
+| 15 | Wrench + bolt | Low | 5K tris | 30 KB | Sketchfab CC0 | 13, 20 |
+| 16 | Oil can (stylized) | Low | 3K tris | 15 KB | Poly Pizza CC0 | 13 |
+| 17 | V4 car engine (cutaway) | High | 40K tris | 220 KB | Sketchfab CC-BY | 14 |
+| 18 | Vernier caliper (animated jaws) | Medium | 8K tris | 50 KB | Sketchfab CC0 | 15, 20 |
+| 19 | 6-DOF robot arm (articulated, 6 joints) | High | 30K tris | 170 KB | Sketchfab CC-BY | 16, 22, 23 |
+| 20 | PLC circuit board (simplified) | Medium | 10K tris | 55 KB | Sketchfab CC0 | 17 |
+| 21 | Hexagonal badge (parametric) | Low | 500 tris | 5 KB | Procedural | 21 |
+| 22 | Cobot (collaborative robot, simplified) | Medium | 20K tris | 120 KB | Sketchfab CC0 | 22 |
+
+**Total: ~1.45 MB** (lazy-loaded per slide, Draco compressed, shared model cache avoids reloading).
+
+### 5B. Sourcing Protocol
+
+1. Search Sketchfab with filters: `downloadable: true`, `license: CC0 or CC-BY`, `format: glTF/GLB`, `category: industrial/mechanical`.
+2. Search Poly Pizza for stylized alternatives.
+3. For simple objects (gears, hexagons, arrows, sheet metal), **generate procedurally** in Three.js.
+4. Optimize **every** model: `npx @gltf-transform/cli optimize input.glb output.glb --compress draco --texture-compress ktx2`.
+5. Verify: max 40K triangles, max 220 KB per file.
+6. Document in `reports/3d-assets.md`: filename, source URL, license, author, triangle count, file size.
+
+### 5C. Procedural Gear Generator
+
+For the hero gear and variants, generate procedurally to guarantee quality:
+
+```javascript
+// js/utils/gear-generator.js
+import * as THREE from 'three';
+
+export function createGear({
+  innerRadius = 0.6,
+  outerRadius = 1.0,
+  teeth = 20,
+  toothDepth = 0.15,
+  thickness = 0.3,
+  color = 0xC9A96E,
+  metalness = 0.8,
+  roughness = 0.38,
+} = {}) {
+  const shape = new THREE.Shape();
+  const steps = teeth * 4;
+
+  for (let i = 0; i <= steps; i++) {
+    const angle = (i / steps) * Math.PI * 2;
+    const toothIndex = Math.floor((i / steps) * teeth * 4) % 4;
+    let r;
+    if (toothIndex < 2) r = outerRadius;
+    else r = outerRadius - toothDepth;
+
+    const x = Math.cos(angle) * r;
+    const y = Math.sin(angle) * r;
+
+    if (i === 0) shape.moveTo(x, y);
+    else shape.lineTo(x, y);
+  }
+
+  // Center hole
+  const hole = new THREE.Path();
+  for (let i = 0; i <= 32; i++) {
+    const angle = (i / 32) * Math.PI * 2;
+    const x = Math.cos(angle) * innerRadius;
+    const y = Math.sin(angle) * innerRadius;
+    if (i === 0) hole.moveTo(x, y);
+    else hole.lineTo(x, y);
+  }
+  shape.holes.push(hole);
+
+  const extrudeSettings = {
+    depth: thickness,
+    bevelEnabled: true,
+    bevelThickness: 0.02,
+    bevelSize: 0.02,
+    bevelSegments: 3,
+  };
+
+  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  geometry.center();
+  geometry.computeVertexNormals();
+
+  const material = new THREE.MeshStandardMaterial({ color, metalness, roughness });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+
+  return mesh;
+}
+
+// Create meshing gear pair
+export function createGearPair(config = {}) {
+  const gear1 = createGear({ teeth: 20, outerRadius: 1.0, color: 0xC9A96E, ...config });
+  const gear2 = createGear({ teeth: 14, outerRadius: 0.72, color: 0xD4C8B8, ...config });
+
+  // Position gear2 so teeth mesh
+  const distance = 1.0 + 0.72 - 0.08; // slight overlap for mesh illusion
+  gear2.position.x = distance;
+
+  const group = new THREE.Group();
+  group.add(gear1, gear2);
+  group.userData = { gear1, gear2, ratio: 20 / 14 };
+
+  return group;
+}
+```
+
+---
+
+# 6. CAMERA CHOREOGRAPHY & ANIMATION
+
+### 6A. Camera Rig Module
+
+```javascript
+// js/utils/camera-rig.js
+import * as THREE from 'three';
+
+export class CameraRig {
+  constructor(camera, config = {}) {
+    this.camera = camera;
+    this.target = new THREE.Vector3();
+    this.currentPos = new THREE.Vector3().copy(camera.position);
+    this.targetPos = new THREE.Vector3().copy(camera.position);
+    this.lerpSpeed = config.lerpSpeed || 0.04;
+    this.autoOrbit = config.autoOrbit || false;
+    this.orbitSpeed = config.orbitSpeed || 0.15; // radians per second
+    this.orbitRadius = config.orbitRadius || 6;
+    this.orbitHeight = config.orbitHeight || 2;
+    this.orbitCenter = new THREE.Vector3(...(config.orbitCenter || [0, 0, 0]));
+    this.paused = false;
+    this.pauseTimer = null;
+  }
+
+  setTarget(pos, lookAt, speed) {
+    this.targetPos.set(...pos);
+    if (lookAt) this.target.set(...lookAt);
+    if (speed) this.lerpSpeed = speed;
+  }
+
+  dollyTo(pos, lookAt, duration = 1.5) {
+    // Smooth cinematic dolly with easing
+    const start = this.camera.position.clone();
+    const end = new THREE.Vector3(...pos);
+    const startLook = this.target.clone();
+    const endLook = new THREE.Vector3(...(lookAt || [0, 0, 0]));
+    let elapsed = 0;
+
+    this._dollyAnim = { start, end, startLook, endLook, duration, elapsed };
+  }
+
+  pauseAutoOrbit(ms = 4000) {
+    this.paused = true;
+    clearTimeout(this.pauseTimer);
+    this.pauseTimer = setTimeout(() => { this.paused = false; }, ms);
+  }
+
+  update(delta, elapsed) {
+    // Dolly animation
+    if (this._dollyAnim) {
+      const d = this._dollyAnim;
+      d.elapsed += delta;
+      const t = Math.min(d.elapsed / d.duration, 1);
+      const e = 1 - Math.pow(1 - t, 3); // ease-out cubic
+
+      this.camera.position.lerpVectors(d.start, d.end, e);
+      this.target.lerpVectors(d.startLook, d.endLook, e);
+      this.camera.lookAt(this.target);
+
+      if (t >= 1) this._dollyAnim = null;
+      return;
+    }
+
+    // Auto orbit
+    if (this.autoOrbit && !this.paused) {
+      const angle = elapsed * this.orbitSpeed;
+      this.camera.position.x = this.orbitCenter.x + Math.cos(angle) * this.orbitRadius;
+      this.camera.position.z = this.orbitCenter.z + Math.sin(angle) * this.orbitRadius;
+      this.camera.position.y = this.orbitCenter.y + this.orbitHeight;
+    } else {
+      // Lerp to target
+      this.camera.position.lerp(this.targetPos, this.lerpSpeed);
+    }
+
+    this.camera.lookAt(this.target);
+  }
+}
+```
+
+### 6B. Per-Slide Camera Choreography
+
+| Slide | Camera Move | Start Position | End Position | Duration | Notes |
+|---|---|---|---|---|---|
+| 01 | Slow orbit (continuous) | [4, 2, 6] | orbiting | ∞ | Speed 0.12 rad/s, radius 6, height 2 |
+| 02 | Static + parallax | [0, 0, 5] | — | — | Subtle mouse parallax ±0.3 |
+| 03 | Slow orbit | [3, 1.5, 5] | orbiting | ∞ | Speed 0.1, tighter than 01 |
+| 04 | Gentle pan left → right | [-3, 2, 5] | [3, 2, 5] | 12s loop | Scanning across objects |
+| 05 | Dolly left → right (scroll-driven) | [-6, 2, 5] | [6, 2, 5] | manual | Tracks 5 gears |
+| 06 | Pull back reveal | [0, 0, 3] | [0, 2, 8] | 1.5s on enter | Reveals radial map |
+| 07 | Orbit + tilt | [4, 3, 4] | orbiting | ∞ | Higher angle shows wireframe overlay |
+| 08 | Fixed with slow zoom | [3, 2, 5] | [2.5, 1.8, 4] | 8s | Subtle creep toward lathe |
+| 09 | Orbit around CNC | [5, 2, 5] | orbiting | ∞ | Speed 0.15, shows all sides |
+| 10 | Static, particles respond to mouse | [0, 0, 4] | — | — | Camera still, sparks move |
+| 11 | Track the bend | [3, 2, 4] | [3, 0.5, 4] | 2s | Follows sheet as it bends |
+| 12 | Orbit + explode on click | [5, 3, 6] | orbiting | ∞ | Pauses during interaction |
+| 13 | Static grid view | [0, 0, 6] | — | — | Shows 3 tool cards |
+| 14 | Orbit around engine | [4, 2, 5] | orbiting | ∞ | Speed 0.08 (slow, detailed) |
+| 15 | Dolly in to caliper | [3, 1, 4] | [1.5, 0.5, 2] | 2s on enter | Focus on measurement |
+| 16 | Pull back from robot | [1, 1, 2] | [4, 3, 7] | 2s on enter | Dramatic reveal |
+| 17 | Split view (two cameras or viewport) | — | — | — | Top/bottom 3D viewports |
+| 18 | Static grid | [0, 1, 5] | — | — | 3 objects floating |
+| 19 | Dolly forward into factory | [0, 2, 10] | [0, 2, 3] | 3s | Immersive |
+| 20 | Static grid | [0, 0, 6] | — | — | 6 tools |
+| 21 | Orbit around hexagon cluster | [0, 3, 5] | orbiting | ∞ | Top-down tilt |
+| 22 | Pull back + robot callback | [3, 2, 5] | [5, 3, 8] | 2s | Robot reappears |
+| 23 | Slow orbit, final gear | [3, 1.5, 4] | orbiting | ∞ | Slowest (0.06 rad/s), contemplative |
+
+### 6C. Transition Animations Between Slides
+
+When navigating from slide N to slide N+1:
+
+```javascript
+// js/transitions.js
+
+export const TRANSITIONS = {
+  // Default: cross-fade
+  default: {
+    out: { opacity: 0, transform: 'translateY(24px)', duration: 400 },
+    in:  { opacity: 1, transform: 'translateY(0)',   duration: 500, delay: 100 },
+    ease: 'var(--ease-out)',
+  },
+
+  // 3D morph: object persists, 2D content cross-fades
+  morph: {
+    out: { opacity: 0, duration: 300 },
+    in:  { opacity: 1, duration: 400, delay: 200 },
+    scene: 'persist',  // ThreeManager keeps canvas, transitions objects internally
+    ease: 'var(--ease-smooth)',
+  },
+
+  // Dramatic dark: fade through warm dark
+  darkReveal: {
+    out: { opacity: 0, duration: 400, background: 'var(--bg-warm-dark)' },
+    in:  { opacity: 1, duration: 600, delay: 300 },
+    ease: 'var(--ease-smooth)',
+  },
+
+  // Playful: slight scale bounce
+  bounce: {
+    out: { opacity: 0, transform: 'scale(0.97)', duration: 350 },
+    in:  { opacity: 1, transform: 'scale(1)',    duration: 500, delay: 100 },
+    ease: 'var(--ease-spring)',
+  },
+};
+
+// Transition map
+export const SLIDE_TRANSITIONS = {
+  '1→2':  'morph',        // gear persists, shrinks
+  '2→3':  'morph',        // chain → gear assembly
+  '3→4':  'bounce',
+  '4→5':  'morph',        // objects → timeline gears
+  '5→6':  'morph',        // KEY: timeline → career map
+  '6→7':  'morph',        // cluster zooms
+  '7→8':  'default',
+  '8→9':  'morph',        // lathe → CNC
+  '9→10': 'darkReveal',   // dramatic shift to welding
+  '10→11':'default',
+  '11→12':'morph',        // sheet → assembly
+  '12→13':'default',
+  '13→14':'default',
+  '14→15':'default',
+  '15→16':'darkReveal',   // into robot reveal
+  '16→17':'default',
+  '17→18':'morph',        // split → comparison
+  '18→19':'default',
+  '19→20':'bounce',
+  '20→21':'morph',        // tools → hexagons
+  '21→22':'morph',        // hexagons → timeline
+  '22→23':'morph',        // timeline → finale
+};
+```
+
+### 6D. Playful Micro-Interactions
+
+```javascript
+// Gear wobble on hover
+mesh.userData.originalRotation = mesh.rotation.clone();
+container.addEventListener('mouseenter', () => {
+  // Spring wobble: quick tilt then settle
+  gsap.to(mesh.rotation, {
+    x: mesh.userData.originalRotation.x + 0.12,
+    z: mesh.userData.originalRotation.z + 0.08,
+    duration: 0.3,
+    ease: 'back.out(3)',
+    onComplete: () => {
+      gsap.to(mesh.rotation, {
+        x: mesh.userData.originalRotation.x,
+        z: mesh.userData.originalRotation.z,
+        duration: 0.6,
+        ease: 'elastic.out(1, 0.4)',
+      });
+    },
+  });
+});
+
+// Floating bob animation (for career map spheres, hex badges)
+function bob(mesh, amplitude = 0.08, speed = 1.5) {
+  mesh.userData.bobOffset = Math.random() * Math.PI * 2;
+  mesh.userData.bobBase = mesh.position.y;
+  // In animate loop:
+  // mesh.position.y = mesh.userData.bobBase + Math.sin(elapsed * speed + mesh.userData.bobOffset) * amplitude;
+}
+
+// Stat counter with spring overshoot
+function animateCounter(element, target, duration = 1200) {
+  const start = performance.now();
+  function tick(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    // Spring overshoot curve
+    const spring = 1 - Math.pow(2, -10 * progress) * Math.cos(progress * Math.PI * 3);
+    const value = Math.round(target * Math.min(spring, 1.15)); // overshoot then settle
+    element.textContent = value;
+    if (progress < 1) requestAnimationFrame(tick);
+    else element.textContent = target; // ensure final value
+  }
+  requestAnimationFrame(tick);
+}
+
+// Tooltip pop-in
+function showTooltip(element) {
+  element.style.transform = 'scale(0.85) translateY(8px)';
+  element.style.opacity = '0';
+  element.style.display = 'block';
+  requestAnimationFrame(() => {
+    element.style.transition = 'transform 0.35s var(--ease-spring), opacity 0.25s ease';
+    element.style.transform = 'scale(1) translateY(0)';
+    element.style.opacity = '1';
+  });
+}
+```
+
+---
+
+# 7. EXPLODED VIEW SYSTEM (THE SHOWSTOPPER)
+
+Detailed implementation for slides 12 and 14.
+
+```javascript
+// js/utils/explode-controller.js
+import * as THREE from 'three';
+
+export class ExplodeController {
+  constructor(group, partsConfig) {
+    this.group = group;
+    this.parts = [];
+    this.exploded = false;
+    this.progress = 0; // 0 = assembled, 1 = exploded
+    this.labels = [];
+
+    partsConfig.forEach(config => {
+      const mesh = group.getObjectByName(config.meshName);
+      if (!mesh) return;
+
+      this.parts.push({
+        mesh,
+        originalPos: mesh.position.clone(),
+        explodedPos: new THREE.Vector3(...config.explodedPosition),
+        originalRot: mesh.rotation.clone(),
+        explodedRot: config.explodedRotation
+          ? new THREE.Euler(...config.explodedRotation)
+          : mesh.rotation.clone(),
+        label: config.label,         // Vietnamese name
+        description: config.description, // Vietnamese short description
+      });
+    });
+  }
+
+  toggle() {
+    this.exploded = !this.exploded;
+  }
+
+  update(delta) {
+    const targetProgress = this.exploded ? 1 : 0;
+    this.progress += (targetProgress - this.progress) * 0.06; // smooth lerp
+
+    this.parts.forEach(part => {
+      part.mesh.position.lerpVectors(part.originalPos, part.explodedPos, this.progress);
+
+      // Interpolate rotation
+      const q1 = new THREE.Quaternion().setFromEuler(part.originalRot);
+      const q2 = new THREE.Quaternion().setFromEuler(part.explodedRot);
+      const q = new THREE.Quaternion().slerpQuaternions(q1, q2, this.progress);
+      part.mesh.quaternion.copy(q);
+    });
+  }
+
+  getLabelsData() {
+    if (this.progress < 0.5) return [];
+    return this.parts.map(part => ({
+      position: part.mesh.position.clone().add(new THREE.Vector3(0, 0.3, 0)),
+      text: part.label,
+      description: part.description,
+      opacity: Math.max(0, (this.progress - 0.5) * 2),
+    }));
+  }
+}
+
+// SLIDE 12 CONFIG:
+export const ASSEMBLY_CUBE_PARTS = [
+  {
+    meshName: 'gear_main',
+    explodedPosition: [0, 2.5, 0],
+    explodedRotation: [0.2, 0, 0],
+    label: 'Bánh răng chính',
+    description: 'Truyền chuyển động quay giữa các trục',
+  },
+  {
+    meshName: 'shaft',
+    explodedPosition: [0, -2, 0],
+    explodedRotation: [0, 0, 0.3],
+    label: 'Trục truyền động',
+    description: 'Truyền mô-men xoắn từ động cơ',
+  },
+  {
+    meshName: 'bearing',
+    explodedPosition: [2.5, 0.5, 0],
+    label: 'Vòng bi (bạc đạn)',
+    description: 'Giảm ma sát, giữ trục quay trơn tru',
+  },
+  {
+    meshName: 'bolts',
+    explodedPosition: [-2, 1.5, 1],
+    explodedRotation: [0, 0.5, 0],
+    label: 'Bu-lông cố định',
+    description: 'Giữ chặt các chi tiết với nhau',
+  },
+  {
+    meshName: 'housing',
+    explodedPosition: [0, 0, 3],
+    label: 'Vỏ bảo vệ',
+    description: 'Bảo vệ các bộ phận bên trong khỏi bụi và va đập',
+  },
+];
+
+// SLIDE 14 CONFIG — V4 ENGINE:
+export const ENGINE_PARTS = [
+  {
+    meshName: 'piston_assembly',
+    explodedPosition: [0, 3, 0],
+    label: 'Nhóm pít-tông',
+    description: 'Nén hỗn hợp nhiên liệu và tạo lực đẩy',
+  },
+  {
+    meshName: 'crankshaft',
+    explodedPosition: [0, -2.5, 0],
+    label: 'Trục khuỷu',
+    description: 'Chuyển chuyển động tịnh tiến thành chuyển động quay',
+  },
+  {
+    meshName: 'camshaft',
+    explodedPosition: [2, 2, 0],
+    label: 'Trục cam',
+    description: 'Điều khiển van nạp và van xả đúng thời điểm',
+  },
+  {
+    meshName: 'cylinder_head',
+    explodedPosition: [0, 2, 2],
+    label: 'Nắp xi-lanh',
+    description: 'Đậy kín buồng đốt, chứa van và bu-gi',
+  },
+  {
+    meshName: 'engine_block',
+    explodedPosition: [0, -1, -2],
+    label: 'Thân máy',
+    description: 'Khung chính chứa xi-lanh và hệ thống làm mát',
+  },
+  {
+    meshName: 'timing_chain',
+    explodedPosition: [-2.5, 1, 0],
+    label: 'Xích cam',
+    description: 'Đồng bộ trục khuỷu và trục cam',
+  },
+];
+```
+
+---
+
+# 8. SLIDE-BY-SLIDE COMPLETE STORYBOARD
+
+Every slide below specifies: layout, 3D scene, camera, interactivity, Vietnamese content (exact text), accent colors, and transition.
+
+---
+
+## ACT I — GIỚI THIỆU
+
+### SLIDE 01 · BÌA (Cover)
+
+**Layout archetype:** Full-bleed 3D (right 60%) + editorial text panel (left 40%)
+
+**Background:** `--bg-cream`
+
+**3D scene:** Hero spur gear, golden metal (`GoldenMetal`), slow orbit (0.12 rad/s), warm studio lighting. Soft bloom halo.
+
+**Camera:** Orbit, radius 5.5, height 1.8, center [0, 0, 0].
+
+**Interactivity:** Mouse hover → gear wobbles (spring tilt 0.12 rad, elastic settle 0.6s).
+
+**Vietnamese text:**
+```
+Eyebrow: HƯỚNG NGHIỆP · 2025
+Title (serif italic): Giới thiệu các nghề trong lĩnh vực cơ khí
+Subtitle: Khám phá thế giới chế tạo, gia công và kỹ thuật cơ khí dành cho học sinh trung học cơ sở.
+Footer: Bấm → hoặc phím cách để tiếp tục
+```
+
+**Accent:** coral eyebrow, honey stat, coral CTA glow
+
+**Transition out (01→02):** Gear shrinks from 100% → 25%, slides to bottom-right. 2D text fades out. Duration: 700ms, ease-out.
+
+---
+
+### SLIDE 02 · MỞ ĐẦU (Opening Hook)
+
+**Layout archetype:** Centered pull-quote + small 3D bottom-right
+
+**Background:** `--bg-linen`
+
+**3D scene:** Bicycle gear + chain segment, gentle rotation (0.08 rad/s), positioned bottom-right at 30% size. `CopperMetal` material.
+
+**Camera:** Static, angled down 15°.
+
+**Interactivity:** Mouse parallax on bicycle gear (±0.4 units). Quote text fades in word-by-word (80ms stagger).
+
+**Vietnamese text:**
+```
+Quote (serif italic, centered):
+"Mỗi khi em đạp xe đạp, bật quạt điện, hay ngồi trên xe buýt đến trường — có hàng trăm chi tiết cơ khí đang âm thầm hoạt động quanh em."
+
+Attribution:
+Em đã bao giờ tự hỏi: ai là người tạo ra những cỗ máy ấy?
+```
+
+**Accent:** rose (quote marks), coral (attribution)
+
+**Transition out (02→03):** Bicycle gear spins faster → chain links scatter upward → reassemble as gear assembly on Slide 03. Duration: 800ms.
+
+---
+
+### SLIDE 03 · CƠ KHÍ LÀ GÌ? (What is Mechanical Engineering?)
+
+**Layout archetype:** Split — text left (42%) + 3D right (58%)
+
+**Background:** `--bg-cream`
+
+**3D scene:** 3-gear assembly, golden + warm-metal + copper materials. Continuous mesh rotation (gear1 clockwise, gear2 counter-clockwise × ratio 20/14, gear3 clockwise × ratio 20/10).
+
+**Camera:** Orbit, radius 5, height 1.5, speed 0.1 rad/s.
+
+**Interactivity:**
+- Click any gear → camera dollies to it, label appears:
+  - Gear 1: "Bánh răng dẫn — truyền lực từ động cơ"
+  - Gear 2: "Bánh răng bị dẫn — nhận lực và thay đổi tốc độ"
+  - Gear 3: "Bánh răng trung gian — kết nối hệ thống"
+- Hover gear → wobble (spring tilt)
+- Labels: `.t-label-3d` style, pop-in with spring
+
+**Vietnamese text:**
+```
+Eyebrow: KHÁI NIỆM CƠ BẢN
+Title: Cơ khí là gì?
+
+Body:
+Cơ khí là ngành kỹ thuật thiết kế, chế tạo và bảo trì máy móc, thiết bị phục vụ đời sống con người.
+
+Three key activities (in colored pills):
+🔧 Thiết kế — Vẽ và lên ý tưởng sản phẩm
+🏭 Chế tạo — Gia công và sản xuất chi tiết
+🔩 Bảo trì — Kiểm tra và sửa chữa máy móc
+
+Fun fact (small, italic):
+Em biết không? Một chiếc xe máy có hơn 1.000 chi tiết cơ khí!
+```
+
+**Accent:** honey (gear glow), tangerine (pills), coral (fun fact)
+
+**Transition out (03→04):** 3 gears separate and fly to 4 corners + center, becoming everyday object anchors. Duration: 800ms.
+
+---
+
+### SLIDE 04 · CƠ KHÍ TRONG ĐỜI SỐNG (In Everyday Life)
+
+**Layout archetype:** Full-slide 3D — 4 floating objects orbit around center label
+
+**Background:** `--bg-cream` with subtle `--bg-peach` radial gradient center
+
+**3D scene:** 4 objects floating in a slow carousel:
+- **Bicycle gear** (from Slide 02, reused) — position [−2.5, 0.5, 0]
+- **Fan** (simple, procedural) — position [2.5, 0.5, 0]
+- **Car gauge cluster** (simplified) — position [0, 0.5, −2.5]
+- **Kitchen mixer** (stylized) — position [0, 0.5, 2.5]
+- Center: floating text sphere with "CƠ KHÍ" label
+
+**Camera:** Gentle pan left→right, 12s loop.
+
+**Interactivity:**
+- Click an object → it enlarges 150%, others dim to 30% opacity, Vietnamese description appears beside it:
+  - Xe đạp: "Giao thông — Xích, líp, phanh đều là chi tiết cơ khí"
+  - Quạt: "Gia dụng — Động cơ quạt chuyển điện thành gió mát"
+  - Ô tô: "Vận tải — Hàng nghìn chi tiết cơ khí phối hợp nhịp nhàng"
+  - Máy xay: "Chế biến — Lưỡi dao, trục quay, hộp số thu nhỏ"
+- Click background → reset all objects
+
+**Vietnamese text:**
+```
+Eyebrow: ỨNG DỤNG
+Title: Cơ khí ở khắp nơi
+
+Subtitle (small):
+Bấm vào mỗi vật thể để tìm hiểu thêm
+```
+
+**Accent:** tangerine (center label), mixed per object
+
+**Transition out (04→05):** 4 objects fly together, compress into a single line, become 5 process gears. Duration: 800ms.
+
+---
+
+### SLIDE 05 · QUY TRÌNH SẢN XUẤT CƠ KHÍ (Production Process)
+
+**Layout archetype:** Centered 3D horizontal timeline + text labels below
+
+**Background:** `--bg-linen`
+
+**3D scene:** 5 gears in a horizontal row (x = −4, −2, 0, 2, 4), each a different size, all meshing. Connected by thin 3D arrow tubes (procedural). Each gear has a different warm-tone material:
+1. Honey (Thiết kế)
+2. Coral (Chế tạo)
+3. Tangerine (Lắp ráp)
+4. Sky (Kiểm tra)
+5. Sage (Bảo trì)
+
+**Camera:** Dolly left→right on scroll/click, revealing one gear at a time. Or auto-scan over 12s.
+
+**Interactivity:**
+- Hover a gear → it lifts up 0.3 units + label appears
+- Click → camera dollies to that gear, description expands below
+
+**Vietnamese text:**
+```
+Eyebrow: QUY TRÌNH
+Title: 5 bước tạo ra sản phẩm cơ khí
+
+Labels (per gear, on hover):
+1. Thiết kế — "Vẽ bản thiết kế bằng phần mềm CAD"
+2. Chế tạo — "Cắt, tiện, phay, đúc chi tiết từ nguyên liệu thô"
+3. Lắp ráp — "Ghép các chi tiết thành sản phẩm hoàn chỉnh"
+4. Kiểm tra — "Đo kiểm kích thước và chất lượng"
+5. Bảo trì — "Bảo dưỡng định kỳ để máy hoạt động bền bỉ"
+```
+
+**Accent:** color per gear (as listed)
+
+**Transition out (05→06) — KEY MORPH:** 5 gears fly outward from timeline positions to radial positions around a center sphere. Arrow connectors dissolve. Duration: 900ms, ease-spring.
+
+---
+
+## ACT II — KHÁM PHÁ NGHỀ NGHIỆP
+
+### SLIDE 06 · BẢN ĐỒ NGHỀ NGHIỆP CƠ KHÍ (Career Map)
+
+**Layout archetype:** Full-slide 3D radial cluster + floating cards
+
+**Background:** `--bg-cream`
+
+**3D scene:** Center sphere "CƠ KHÍ" (golden, glowing) + 6 smaller spheres arranged radially, each representing a career cluster. Each sphere has a unique accent color and a small iconic 3D object attached:
+1. **Thiết kế & Kỹ sư** (sky) — mini wireframe gear
+2. **Gia công & Chế tạo** (coral) — mini lathe tool bit
+3. **Hàn & Tôn tấm** (tangerine) — mini welding torch
+4. **Lắp ráp & Bảo trì** (sage) — mini wrench
+5. **Kiểm soát chất lượng** (sky lighter) — mini caliper
+6. **Robot & Cơ điện tử** (lavender) — mini robot gripper
+
+All spheres bob gently (different phases). Thin connecting lines to center, pulsing with light.
+
+**Camera:** Pull-back reveal on enter (from [0,0,3] → [0,2,8], 1.5s). Then slow orbit.
+
+**Interactivity:**
+- Hover a sphere → it lifts 0.5 units + scales 120% + card appears beside it listing specific careers
+- Click a sphere → navigate to the corresponding career slide (7–17)
+
+**Vietnamese text:**
+```
+Title: Bản đồ nghề nghiệp cơ khí
+
+Per-cluster hover cards:
+1. "Kỹ sư cơ khí · Kỹ sư thiết kế"
+2. "Thợ tiện · Thợ phay · Kỹ thuật viên CNC"
+3. "Thợ hàn · Thợ gia công tôn"
+4. "Kỹ thuật viên lắp ráp · Kỹ thuật viên bảo trì"
+5. "Kỹ thuật viên QC · Kỹ thuật viên đo lường"
+6. "Kỹ thuật viên robot · Kỹ thuật viên cơ điện tử"
+
+Hint (bottom, small): Bấm vào nhóm nghề để tìm hiểu chi tiết
+```
+
+**Transition out (06→07):** Clicked/default cluster zooms to fill left panel; all other clusters shrink and fade. Duration: 700ms.
+
+---
+
+### SLIDE 07 · KỸ SƯ CƠ KHÍ (Mechanical Engineer)
+
+**Layout:** 3D left (55%) + text right (45%)
+
+**Background:** `--bg-cream`
+
+**3D scene:** Gear transitioning: starts solid → splits into wireframe overlay + solid underneath, simulating "CAD design mode." Blueprint-style grid floor (thin blue lines). Gear orbits slowly.
+
+**Camera:** Orbit + tilt (higher angle, 30°).
+
+**Interactivity:**
+- Toggle button: "Bản vẽ ↔ Thực tế" — switches between wireframe and solid view
+- Hover parts → labels appear
+
+**Vietnamese text:**
+```
+Eyebrow: NGHỀ · 01
+Title: Kỹ sư cơ khí / Thiết kế cơ khí
+
+Body:
+Kỹ sư cơ khí là người thiết kế, phân tích và cải tiến máy móc, thiết bị. Họ sử dụng phần mềm chuyên dụng để vẽ bản thiết kế 3D trước khi sản xuất.
+
+Details (in cards):
+📐 Công cụ: SolidWorks, AutoCAD, Inventor
+💻 Môi trường: Văn phòng kỹ thuật, phòng R&D
+📚 Học vấn: Tốt nghiệp đại học ngành cơ khí
+💡 Kỹ năng: Tư duy không gian, tính toán kỹ thuật, sáng tạo
+
+Fun fact:
+Một kỹ sư có thể thiết kế hàng trăm chi tiết trên máy tính trước khi bất kỳ chi tiết nào được sản xuất thật!
+```
+
+**Accent:** sky
+
+**Photo:** Real photo of CAD workstation (inset, small, rounded-xl, bottom-right of text panel)
+
+---
+
+### SLIDE 08 · KỸ THUẬT VIÊN GIA CÔNG (Machining Technician)
+
+**Layout:** Top: 3D scene (55% height) + Bottom: 3-column text
+
+**Background:** `--bg-cream`
+
+**3D scene:** Simplified lathe: rotating cylindrical workpiece + stationary cutting tool + animated metal shaving particles (small, copper-colored, spray outward). Tool slowly advances toward workpiece.
+
+**Camera:** Fixed with slow zoom in (8s).
+
+**Interactivity:** Mouse hover → particles respond (spray direction follows cursor slightly).
+
+**Vietnamese text:**
+```
+Eyebrow: NGHỀ · 02
+Title: Kỹ thuật viên gia công cơ khí
+
+Column 1 — Tiện:
+Quay phôi tròn, dùng dao cắt tạo hình trụ, côn, ren. Tạo ra trục, bu-lông, ống.
+
+Column 2 — Phay:
+Dùng dao phay quay tốc độ cao để cắt bề mặt phẳng, rãnh, bánh răng.
+
+Column 3 — Khoan:
+Tạo lỗ chính xác trên kim loại. Cần đo kích thước cẩn thận từng mili-mét.
+
+Bottom note (italic):
+Thợ gia công giỏi có thể đạt độ chính xác đến 0,01 mm — mỏng hơn sợi tóc 5 lần!
+```
+
+**Accent:** coral
+
+**Transition out (08→09) — MORPH:** Lathe model fades to 25% opacity while CNC model fades in at same position. Workpiece continues spinning. Particles change color from copper to sky-blue. Duration: 800ms.
+
+---
+
+### SLIDE 09 · KỸ THUẬT VIÊN CNC (CNC Operator)
+
+**Layout:** 3D right (62%) + text left (38%)
+
+**Background:** `--bg-linen`
+
+**3D scene:** 3-axis CNC mill. Animated: spindle lowers → traces a curved toolpath on steel block → retracts → repositions → repeats. Soft spark particles on contact. X/Y/Z axis arrows visible (red/green/blue, subtle).
+
+**Camera:** Orbit, radius 6, speed 0.12 rad/s.
+
+**Interactivity:**
+- Click "Xem trục X-Y-Z" button → X/Y/Z arrows glow and labels appear: "Trục X — Ngang", "Trục Y — Dọc", "Trục Z — Lên/xuống"
+- Drag to rotate (OrbitControls, damped)
+- Click spindle → dolly in, label: "Mũi dao — quay 8.000–24.000 vòng/phút"
+
+**Vietnamese text:**
+```
+Eyebrow: NGHỀ · 03
+Title: Kỹ thuật viên vận hành máy CNC
+
+Body:
+CNC (điều khiển số bằng máy tính) cho phép gia công chi tiết phức tạp với độ chính xác cực cao. Kỹ thuật viên lập trình máy bằng mã G-code.
+
+Stats (in a row):
+±0,005 mm — Độ chính xác
+24.000 rpm — Tốc độ trục chính
+3–5 trục — Số trục chuyển động
+
+Detail cards:
+🖥️ Phần mềm: Mastercam, Fanuc, Siemens NX
+📏 Độ chính xác: Cao hơn gia công thủ công rất nhiều
+⚙️ Ứng dụng: Linh kiện máy bay, ô tô, y tế
+
+Thú vị: Máy CNC có thể chạy 24/7 mà không cần nghỉ — nhưng vẫn cần kỹ thuật viên giám sát!
+```
+
+**Accent:** sky (primary), lavender (stats)
+
+---
+
+### SLIDE 10 · THỢ HÀN (Welder)
+
+**Layout:** Full-bleed 3D + text overlay card (top-left, glass style)
+
+**Background:** `--bg-warm-dark` (warm espresso — dramatic)
+
+**3D scene:** 🔥 Welding torch angled at 15° to a horizontal steel plate. **Particle system:** 200+ warm orange/yellow particles spraying from contact point, obeying gravity, bouncing off plate surface, fading over 1.5s. Torch nozzle glows orange. Steel plate shows a glowing orange seam line.
+
+**Camera:** Static, low angle (camera at y=0.3, looking slightly up). Cinematic.
+
+**Interactivity:**
+- Mouse position influences spark spray direction (gentle, ±15°)
+- Click "Xem quy trình" → overlay animation shows: Arc → Pool → Seam (3-step)
+
+**Lighting:** Darker ambient (0.15), strong rim light (coral, 0.8), key light dimmed (0.6). Sparks are self-luminous (`AdditiveBlending`).
+
+**Vietnamese text:**
+```
+Eyebrow (text-on-dark): NGHỀ · 04
+Title: Thợ hàn
+
+Body (in frosted card):
+Thợ hàn nối các chi tiết kim loại bằng nhiệt độ cao. Đây là nghề đòi hỏi tay nghề vững và ý thức an toàn cao.
+
+Types (list):
+🔥 Hàn MIG — Dùng khí bảo vệ, phổ biến trong công nghiệp
+⚡ Hàn TIG — Chính xác cao, dùng cho inox và nhôm
+🔩 Hàn que — Truyền thống, dùng ngoài trời
+
+Safety (warning card, coral border):
+⚠️ An toàn: Mặt nạ hàn, găng tay chịu nhiệt, quần áo bảo hộ — bắt buộc 100%!
+```
+
+**Accent:** honey (sparks, glow), tangerine (stats), coral (safety warning)
+
+**Transition out (10→11):** Sparks fade to dark. Fade through warm-dark. Duration: 500ms out + 500ms in.
+
+---
+
+### SLIDE 11 · KỸ THUẬT VIÊN GIA CÔNG TÔN TẤM (Sheet Metal)
+
+**Layout:** Diagonal — 3D top-left (55%) + text bottom-right (45%)
+
+**Background:** `--bg-cream`
+
+**3D scene:** Flat sheet metal panel that **bends in real time.** Animation loop (8s):
+- Flat → 45° bend → 90° bend → box form → unfold back to flat
+- Uses morph targets or bone-based deformation
+
+**Camera:** Track the bend — camera lowers as sheet bends. 
+
+**Interactivity:** Slider control: student can drag to manually control bend angle (0° → 90°). Label shows current angle.
+
+**Vietnamese text:**
+```
+Eyebrow: NGHỀ · 05
+Title: Kỹ thuật viên gia công tôn tấm
+
+Body:
+Nghề tôn tấm biến những tấm kim loại phẳng thành các sản phẩm 3D: vỏ máy, tủ điện, ống thông gió, thùng xe tải.
+
+Processes:
+✂️ Cắt — Laser, plasma, kéo cắt tôn
+📐 Gấp — Máy chấn (press brake) gấp tấm theo góc chính xác
+🔨 Tạo hình — Dập, cuộn, tạo hình phức tạp
+
+Stat: Máy cắt laser hiện đại cắt thép dày 20 mm với tốc độ 5 mét/phút!
+```
+
+**Accent:** coral
+
+**Transition out (11→12) — MORPH:** Folded sheet morphs into assembly cube (parts come together). Duration: 800ms.
+
+---
+
+### SLIDE 12 · KỸ THUẬT VIÊN LẮP RÁP (Assembly Technician)
+
+**Layout:** 3D left (60%) + text right (40%)
+
+**Background:** `--bg-cream`
+
+**3D scene:** 🔥 **EXPLODED ASSEMBLY VIEW.** Mechanical assembly cube (5 parts: gear, shaft, bearing, bolts, housing). Starts assembled.
+
+**Camera:** Orbit, radius 6, speed 0.08 rad/s.
+
+**Interactivity:**
+- **"Tháo rời" button** → parts fly apart along normals, Vietnamese labels pop in beside each part (spring animation)
+- **"Lắp ráp" button** → parts reassemble
+- **Click individual part** → camera dollies to it, detailed description appears
+- **Drag to rotate** during either state
+
+**Part labels (Vietnamese):**
+1. Bánh răng chính — "Truyền chuyển động quay giữa các trục"
+2. Trục truyền động — "Truyền mô-men xoắn từ động cơ"
+3. Vòng bi (bạc đạn) — "Giảm ma sát, giữ trục quay trơn tru"
+4. Bu-lông cố định — "Giữ chặt các chi tiết với nhau"
+5. Vỏ bảo vệ — "Bảo vệ các bộ phận bên trong"
+
+**Vietnamese text:**
+```
+Eyebrow: NGHỀ · 06
+Title: Kỹ thuật viên lắp ráp cơ khí
+
+Body:
+Kỹ thuật viên lắp ráp ghép hàng chục đến hàng nghìn chi tiết thành sản phẩm hoàn chỉnh. Họ đọc bản vẽ kỹ thuật, sử dụng dụng cụ đo và lắp theo quy trình chính xác.
+
+Skills list:
+📖 Đọc bản vẽ kỹ thuật
+🔧 Sử dụng dụng cụ cầm tay (cờ-lê, tuốc-nơ-vít, mỏ-lết)
+📏 Kiểm tra kích thước sau lắp ráp
+🧩 Phát hiện lỗi và điều chỉnh
+
+Hint: Bấm "Tháo rời" để xem bên trong!
+```
+
+**Accent:** sage
+
+---
+
+### SLIDE 13 · KỸ THUẬT VIÊN BẢO TRÌ (Maintenance Technician)
+
+**Layout:** 3 vertical panels side-by-side (each 33%, rounded-2xl, shadow-md)
+
+**Background:** `--bg-linen`
+
+**3D scene:** 3 mini scenes, one per panel:
+- Panel 1: Wrench rotating slowly
+- Panel 2: Gear with pulsing "healthy" green glow → fades to "warning" orange
+- Panel 3: Oil can tilting to pour (animated pour)
+
+**Camera:** Static per panel.
+
+**Interactivity:** Hover panel → slight lift + shadow grows.
+
+**Vietnamese text:**
+```
+Eyebrow: NGHỀ · 07
+Title: Kỹ thuật viên bảo trì cơ khí
+
+Panel 1 — Kiểm tra:
+"Kiểm tra máy định kỳ. Phát hiện sớm tiếng ồn bất thường, rung lắc, mài mòn."
+
+Panel 2 — Bảo dưỡng:
+"Tra dầu, thay lọc, siết bu-lông, cân chỉnh. Ngăn ngừa hỏng hóc trước khi xảy ra."
+
+Panel 3 — Sửa chữa:
+"Khi máy hỏng: tìm nguyên nhân, thay thế linh kiện, chạy thử và bàn giao."
+
+Bottom: "Bảo trì tốt = máy chạy bền = nhà máy tiết kiệm hàng tỷ đồng mỗi năm!"
+```
+
+**Accent:** sage (panel borders)
+
+---
+
+### SLIDE 14 · THỢ SỬA CHỮA Ô TÔ (Automotive Mechanic)
+
+**Layout:** 3D left (65%) + checklist right (35%)
+
+**Background:** `--bg-cream`
+
+**3D scene:** 🔥 **V4 ENGINE CUTAWAY.** Half-sectioned car engine. Pistons animate up/down in firing order (1-3-4-2). Crankshaft rotates. Valves open/close. Camera orbits slowly (0.06 rad/s).
+
+**Camera:** Orbit + gentle tilt.
+
+**Interactivity:**
+- **"Tháo rời" button** → engine explodes into 6 labeled parts (see §7 ENGINE_PARTS config)
+- Click piston → zoom in, label: "Pít-tông — nén hỗn hợp nhiên liệu và tạo lực đẩy"
+- Click crankshaft → label: "Trục khuỷu — chuyển chuyển động thẳng thành quay"
+- Speed slider: controls engine RPM (visual animation speed)
+
+**Vietnamese text:**
+```
+Eyebrow: NGHỀ · 08
+Title: Thợ sửa chữa ô tô
+
+Checklist:
+☑ Chẩn đoán lỗi bằng máy đọc mã OBD
+☑ Kiểm tra hệ thống phanh, lái, treo
+☑ Thay dầu, lọc, bu-gi định kỳ
+☑ Sửa chữa hộp số, ly hợp, động cơ
+☑ Cân chỉnh góc đặt bánh xe
+☑ Kiểm tra hệ thống điện ô tô
+
+Stat: Một ô tô hiện đại có khoảng 30.000 chi tiết — thợ sửa xe giỏi phải hiểu từng hệ thống!
+
+Safety: ⚠️ Luôn kê chắc xe trên giá nâng trước khi chui xuống gầm
+```
+
+**Accent:** coral (checklist checks), tangerine (stat)
+
+---
+
+### SLIDE 15 · KIỂM SOÁT CHẤT LƯỢNG (Quality Control)
+
+**Layout:** Centered 3D (50%) + floating measurement callout cards around edges
+
+**Background:** `--bg-linen`
+
+**3D scene:** Vernier caliper gripping a precision-machined cylindrical part. Caliper jaws animate: slowly close → readout appears (CSS2D label) showing "45.00 mm" → open → close again at different position → "12.50 mm."
+
+**Camera:** Dolly in on enter (from z=5 → z=2.5, 2s). Then static.
+
+**Interactivity:**
+- Drag caliper jaws open/close → readout updates in real time
+- Click the measured part → labels show: "Đường kính: 45.00 mm ± 0.01 mm"
+
+**Vietnamese text:**
+```
+Eyebrow: NGHỀ · 09
+Title: Kỹ thuật viên kiểm soát chất lượng
+
+Callout cards (floating around 3D):
+📏 Thước kẹp (caliper) — Đo kích thước ngoài, trong, chiều sâu
+📐 Panme (micrometer) — Đo chính xác đến 0,001 mm
+📊 Máy đo 3D (CMM) — Quét tọa độ 3 chiều của chi tiết
+
+Body:
+Mỗi chi tiết phải đạt kích thước chính xác theo bản vẽ. Sai 0,1 mm có thể khiến cả cỗ máy không hoạt động.
+
+Stat: ±0,005 mm — sai số cho phép của chi tiết hàng không (mỏng hơn sợi tóc 15 lần!)
+```
+
+**Accent:** sky
+
+---
+
+### SLIDE 16 · ROBOT CÔNG NGHIỆP (Industrial Robotics)
+
+**Layout:** Full-bleed 3D + floating info card bottom-right (frosted glass)
+
+**Background:** `--bg-warm-dark` (dramatic dark — robot glows)
+
+**3D scene:** 🔥 **6-DOF ROBOT ARM.** Articulated: base rotates, 3 arm joints, wrist, gripper. Animates a pick-and-place cycle (8s loop):
+1. Reach down → gripper closes on a small cube
+2. Lift → rotate base 90°
+3. Extend → place cube on stack
+4. Release → retract → rotate back
+5. Repeat
+
+**Camera:** Dramatic pull-back reveal on enter (from [1,1,2] → [5,3,8], 2s). Then slow orbit.
+
+**Lighting:** Darker ambient (0.2), strong lavender rim light (0.6), spot light on robot (1.5).
+
+**Interactivity:**
+- Drag to rotate camera around robot
+- Click a joint → label appears with Vietnamese joint name: "Khớp vai", "Khớp khuỷu", "Khớp cổ tay", "Tay kẹp"
+- Slider: control animation speed (0.5x → 2x)
+
+**Vietnamese text:**
+```
+Eyebrow (text-on-dark): NGHỀ · 10
+Title: Kỹ thuật viên robot công nghiệp
+
+Card:
+Robot công nghiệp thay thế con người ở những công việc nặng nhọc, nguy hiểm hoặc đòi hỏi tốc độ cao.
+
+Details:
+🤖 Lập trình: Dạy robot bằng pendant hoặc phần mềm mô phỏng
+🔄 Vận hành: Giám sát, khắc phục lỗi, tối ưu chu trình
+🏭 Ứng dụng: Hàn robot, sơn, lắp ráp ô tô, đóng gói
+
+Stat: Một robot hàn có thể hoạt động liên tục 20 giờ/ngày với độ chính xác ±0,1 mm!
+```
+
+**Accent:** lavender (glow, card border), honey (stat)
+
+---
+
+### SLIDE 17 · CƠ ĐIỆN TỬ (Mechatronics)
+
+**Layout:** Split — top half (sage tint bg) + bottom half (lavender tint bg)
+
+**Background:** Two-tone gentle color wash
+
+**3D scene:** Two mini scenes:
+- **Top:** Gear rotating (warm metal) + label "CƠ KHÍ"
+- **Bottom:** PLC circuit board with animated LED pulse lights + label "ĐIỆN TỬ"
+- **Connecting element:** A flowing light beam (particle line) from gear down to PLC, symbolizing fusion
+
+**Camera:** Static, centered.
+
+**Interactivity:** Hover top half → gear speeds up. Hover bottom half → LED pulses brighten. Both halves together → connecting beam glows strongest.
+
+**Vietnamese text:**
+```
+Eyebrow: NGHỀ · 11
+Title: Kỹ thuật viên cơ điện tử
+
+Formula (large, centered):
+Cơ khí + Điện tử + Điều khiển = Máy thông minh
+
+Body:
+Cơ điện tử (mechatronics) kết hợp ba lĩnh vực để tạo ra máy móc có thể tự vận hành, tự điều chỉnh và giao tiếp với con người.
+
+Examples:
+🏭 Dây chuyền sản xuất tự động
+🚗 Hệ thống ABS trên ô tô
+🏥 Máy nội soi y tế
+🤖 Robot dịch vụ (robot phục vụ nhà hàng)
+
+Stat: Đến năm 2030, hơn 70% nhà máy mới sẽ cần kỹ thuật viên cơ điện tử.
+```
+
+**Accent:** mint (beam), sage + lavender (split)
+
+---
+
+## ACT III — HIỂU BIẾT NGHỀ NGHIỆP
+
+### SLIDE 18 · SO SÁNH CÁC NGHỀ (Comparison)
+
+**Layout:** 3 floating 3D objects above 3 comparison cards
+
+**Background:** `--bg-cream`
+
+**3D scene:** 3 mini objects hovering above cards:
+- Card 1: Gear (coral) — "Nhóm chế tạo"
+- Card 2: Caliper (sky) — "Nhóm kỹ thuật"
+- Card 3: Robot gripper (lavender) — "Nhóm công nghệ cao"
+
+Objects bob gently, different phases.
+
+**Vietnamese text:**
+```
+Eyebrow: SO SÁNH
+Title: Ba nhóm nghề cơ khí chính
+
+Card 1 — Nhóm chế tạo (coral):
+Nghề: Thợ gia công, thợ hàn, thợ tôn
+Nơi làm: Xưởng sản xuất, nhà máy
+Dụng cụ: Máy tiện, máy hàn, máy chấn
+Kỹ năng: Tay nghề cao, chịu khó, cẩn thận
+
+Card 2 — Nhóm kỹ thuật (sky):
+Nghề: Kỹ sư thiết kế, KTV lắp ráp, KTV bảo trì, KTV QC
+Nơi làm: Văn phòng kỹ thuật, nhà máy
+Dụng cụ: CAD, dụng cụ đo, máy kiểm tra
+Kỹ năng: Tư duy logic, đọc bản vẽ, phân tích
+
+Card 3 — Nhóm công nghệ cao (lavender):
+Nghề: KTV CNC, KTV robot, KTV cơ điện tử
+Nơi làm: Nhà máy tự động, phòng kỹ thuật
+Dụng cụ: CNC, robot, PLC, phần mềm
+Kỹ năng: Lập trình, tư duy hệ thống, ngoại ngữ
+```
+
+---
+
+### SLIDE 19 · MÔI TRƯỜNG LÀM VIỆC (Workplaces)
+
+**Layout:** Full-slide 3D scene + 5 floating location cards
+
+**Background:** `--bg-linen`
+
+**3D scene:** Abstract factory floor — instanced geometry (boxes, cylinders) suggesting machines. Warm volumetric fog. Camera dollies slowly forward into the scene.
+
+**Interactivity:** 5 clickable location markers in the scene, each opens a card with photo + description:
+1. Nhà máy sản xuất
+2. Xưởng cơ khí
+3. Gara ô tô
+4. Văn phòng thiết kế kỹ thuật
+5. Dây chuyền tự động hóa
+
+**Accent:** honey (volumetric light)
+
+---
+
+### SLIDE 20 · CÔNG CỤ VÀ CÔNG NGHỆ (Tools & Tech)
+
+**Layout:** 2×3 grid of 3D tool icons (each in a card, rounded-2xl)
+
+**Background:** `--bg-cream`
+
+**3D scene:** 6 small objects in grid cells, each rotating gently:
+1. CAD icon (wireframe cube) — sky
+2. CNC bit (tool bit model) — coral
+3. Caliper (from model #18) — sky
+4. Robot gripper (from model #19) — lavender
+5. Wrench (from model #15) — sage
+6. Laptop with gear on screen (procedural) — tangerine
+
+**Interactivity:** Hover card → object rotates faster + lifts. Click → description expands below card.
+
+**Vietnamese text (per cell):**
+```
+1. Phần mềm CAD — "SolidWorks, AutoCAD, Inventor — thiết kế 3D"
+2. Máy CNC — "Gia công tự động, chính xác đến 0,005 mm"
+3. Dụng cụ đo — "Thước kẹp, panme, máy CMM"
+4. Robot công nghiệp — "ABB, KUKA, Fanuc — tự động hóa"
+5. Dụng cụ cầm tay — "Cờ-lê, tuốc-nơ-vít, mỏ-lết, búa"
+6. Phần mềm mô phỏng — "Mastercam, ANSYS, MATLAB"
+```
+
+**Transition out (20→21) — MORPH:** 6 rectangular cards morph into 6 hexagons. Duration: 800ms, ease-spring.
+
+---
+
+### SLIDE 21 · KỸ NĂNG VÀ PHẨM CHẤT (Skills)
+
+**Layout:** 6 hexagonal 3D badges in honeycomb
+
+**Background:** `--bg-linen`
+
+**3D scene:** 6 parametric hexagonal prisms (procedural, ExtrudeGeometry, 0.3 depth, rounded edges). Each a different warm-accent color with embedded icon (2D CSS overlay). Gentle bob animation (different phases).
+
+**Camera:** Tilted top-down (elevation 50°), slow orbit.
+
+**Interactivity:** Hover hex → lifts 0.5 + rotates 10° + description card appears below.
+
+**Vietnamese text (per hexagon):**
+```
+1. (sage) Chính xác — "Đọc bản vẽ, đo kiểm, lắp ráp — mọi thứ phải đúng đến từng mm"
+2. (sky) Tư duy logic — "Phân tích vấn đề, tìm nguyên nhân, đưa ra giải pháp bước-theo-bước"
+3. (honey) Sáng tạo — "Thiết kế giải pháp mới, cải tiến quy trình, sáng chế công cụ"
+4. (coral) Làm việc nhóm — "Phối hợp với kỹ sư, thợ máy, quản lý — ai cũng quan trọng"
+5. (tangerine) An toàn — "Luôn đội mũ bảo hộ, đeo kính, mang găng tay đúng quy định"
+6. (lavender) Ham học hỏi — "Công nghệ thay đổi nhanh — ai học liên tục sẽ tiến xa nhất"
+```
+
+**Transition out (21→22) — MORPH:** 6 hexagons collapse into 4 timeline dots (drop into vertical positions). Duration: 800ms.
+
+---
+
+### SLIDE 22 · CƠ HỘI TƯƠNG LAI (Future Opportunities)
+
+**Layout:** Left: vertical timeline + text (40%) | Right: 3D scene (60%)
+
+**Background:** `--bg-warm-dark` (dark — aspirational tone)
+
+**3D scene:** Robot arm from Slide 16 returns (smaller, top-right, gentle idle sway) + abstract particle city/factory below it (instanced cubes with glowing windows, warm honey). Camera slowly rises.
+
+**Interactivity:** Robot arm responds to mouse with slight lean toward cursor.
+
+**Vietnamese text:**
+```
+Eyebrow (text-on-dark): TƯƠNG LAI
+Title: Cơ hội trong ngành cơ khí
+
+Timeline milestones:
+🔹 2025 — Tự động hóa nhà máy: Nhu cầu KTV CNC và robot tăng mạnh
+🔹 2027 — Sản xuất thông minh: Nhà máy kết nối IoT cần kỹ thuật viên cơ điện tử
+🔹 2030 — Công nghiệp xanh: Chế tạo tiết kiệm năng lượng, vật liệu mới
+🔹 2035 — Robot cộng tác: Con người và robot làm việc cạnh nhau
+
+Bottom (honest note, italic):
+Ngành cơ khí luôn cần người giỏi. Nhưng thành công đòi hỏi học tập liên tục, rèn luyện tay nghề, và yêu thích công việc bằng tay lẫn trí óc.
+```
+
+**Accent:** lavender (timeline dots), honey (milestone numbers)
+
+---
+
+### SLIDE 23 · KẾT LUẬN (Conclusion)
+
+**Layout:** Minimal centered text + 3D gear callback (small, top-right)
+
+**Background:** `--bg-warm-dark`
+
+**3D scene:** 🔥 **FINALE.** Brief particle swirl (2s): tiny versions of all 22 objects spin in a vortex, then settle into the single hero gear from Slide 01. Gear rotates in warm golden light, slowest orbit of the entire deck (0.04 rad/s). A soft particle "aurora" effect behind it.
+
+**Camera:** Static, centered on gear, gentle breathing zoom (scale 1.0 ↔ 1.02, 4s loop).
+
+**Vietnamese text:**
+```
+(Serif italic, centered, large):
+"Cơ khí là nền tảng của mọi ngành công nghiệp.
+Tương lai thuộc về những đôi tay khéo léo
+và khối óc sáng tạo."
+
+(Small, below, regular):
+Cảm ơn mọi người đã theo dõi!
+
+(Footer):
+HƯỚNG NGHIỆP · 2025 · Lĩnh vực Cơ khí
+```
+
+**Accent:** coral (underline beneath quote)
+
+**No transition out** — this is the final slide. On `→` key press, loop back to Slide 01.
+
+---
+
+# 9. IMAGE REQUIREMENTS
+
+Real industrial photos are still needed alongside 3D content — for inset panels, background texture, and mobile fallbacks.
+
+| Slide | Search Terms | Usage | Min Resolution |
+|---|---|---|---|
+| 07 | "mechanical engineer CAD workstation editorial" | Inset photo, text panel | 960×640 |
+| 08 | "lathe operator metal chips real workshop" | Background strip top | 1920×640 |
+| 10 | "welding sparks dramatic close-up" | Mobile fallback | 1920×1080 |
+| 13 | "machine maintenance technician" ×3 | Panel backgrounds | 640×480 each |
+| 14 | "automotive mechanic engine repair" | Mobile fallback | 1920×1080 |
+| 16 | "industrial robot arm factory" | Mobile fallback | 1920×1080 |
+| 19 | "modern factory floor", "automated warehouse", "car repair garage", "engineering office", "robotic production line" | 5 location cards | 640×480 each |
+| 22 | "smart factory Industry 4.0", "cobot collaborative robot" | Mobile fallback | 1920×1080 |
+
+All images: WebP, warm color-graded (−10% saturation, +3% warmth, +5% contrast), no watermarks, no AI-generated. Documented in `reports/asset-sources.md`.
+
+---
+
+# 10. NAVIGATION & CHROME
+
+### Keyboard
+
+| Key | Action |
+|---|---|
+| `→` or `Space` | Next slide |
+| `←` | Previous slide |
+| `Home` | First slide |
+| `End` | Last slide |
+| `O` | Toggle overview grid |
+| `F` | Toggle fullscreen |
+| `Esc` | Exit fullscreen or overview |
+| `1`–`9` then `Enter` | Jump to slide 1–9 |
+
+### Mouse / Touch
+
+- Click right half → next. Click left half → previous.
+- Swipe left/right on touch devices.
+- Auto-hiding chrome: progress bar + slide counter + nav arrows. Appear on mouse move, fade after 3s idle.
+
+### Progress Bar
+
+3px height, fixed top, `--bg-linen` track, `--coral` fill, animated width (`transition: width 0.4s var(--ease-out)`).
+
+### Slide Counter
+
+Top-right, `14px`, `--text-soft`, tabular-nums: `04 / 23`. On dark slides: `--text-on-dark`.
+
+### Overview Grid
+
+Full-screen overlay. 4-column grid on desktop, 2-column on tablet. Each cell: rendered canvas snapshot (or live thumbnail), rounded-xl, shadow-md, hover → scale 1.04 + shadow-lg. Click → jump. Current slide highlighted with coral border.
+
+---
+
+# 11. RESPONSIVE & PERFORMANCE
+
+### Device Tiers
+
+| Tier | Detection | 3D | Images |
+|---|---|---|---|
+| **Desktop** (≥1280px, no touch, good GPU) | `!('ontouchstart' in window) && hardwareConcurrency >= 6` | Full 3D, all effects, postprocessing | WebP |
+| **Tablet** (768–1279px or touch) | Touch detected or narrower viewport | Full 3D, no postprocessing, lower DPR (1.0) | WebP |
+| **Low-end** (< 768px or weak GPU) | `hardwareConcurrency < 4` or WebGL failure | Pre-rendered PNG fallbacks | JPEG |
+
+### Performance Targets
+
+| Metric | Target |
+|---|---|
+| First Contentful Paint | < 1.5s |
+| First 3D frame | < 3.0s |
+| Frame rate (desktop) | ≥ 55 FPS |
+| Frame rate (tablet) | ≥ 30 FPS |
+| Total asset size | < 8 MB (all models + images + code) |
+| Per-slide 3D payload | < 250 KB (lazy-loaded) |
+| Code (JS + CSS) | < 300 KB |
+
+### Lazy Loading
+
+Each 3D scene loads only when its slide is within ±1 of the current slide. Previous scenes dispose after ±3 slides. Model cache persists across slides.
+
+---
+
+# 12. QUALITY ASSURANCE
+
+**Do not stop after the first build. Render, inspect, fix, verify.**
+
+### Visual QA
+- [ ] All 23 slides render. No blank canvases.
+- [ ] No two consecutive slides use the same layout archetype.
+- [ ] 3D materials are uniformly warm across all scenes.
+- [ ] No Z-fighting, no clipping, no floating detached parts.
+- [ ] Vietnamese diacritics perfect: test "cơ điện tử", "kỹ thuật viên", "sửa chữa".
+- [ ] Colors stay within the warm family. No cold blues, no neon.
+- [ ] All photos are warm color-graded and cropped correctly.
+- [ ] Capture 1920×1080 PNG of every slide → `reports/preview/`.
+- [ ] Generate contact sheet (6×4 grid, all 23 slides).
+
+### 3D QA
+- [ ] Every GLB < 250 KB after Draco compression.
+- [ ] All materials use warm metalness/roughness (no shiny plastic).
+- [ ] Camera paths never clip through objects.
+- [ ] Exploded views (slides 12, 14) animate smoothly without jitter.
+- [ ] Labels (CSS2D) position correctly in 3D space, no overlap.
+- [ ] Interactive elements respond within 16ms.
+- [ ] No memory leaks on slide transitions (dispose check).
+- [ ] Mobile fallback PNGs display when WebGL unavailable.
+- [ ] Frame rate ≥ 55 FPS on desktop (check with stats.js during dev).
+
+### Functional QA
+- [ ] Keyboard navigation: all keys from §10 work.
+- [ ] Touch swipe works on iPad Safari.
+- [ ] Overview grid opens/closes.
+- [ ] Fullscreen toggle works in Chrome, Safari, Edge.
+- [ ] Morph transitions fire on all 10 pairs from §6C.
+- [ ] Service worker caches all assets for offline use.
+- [ ] No console errors. No network errors offline.
+- [ ] Works from `file://` (no CORS issues with local models).
+
+### Content QA
+- [ ] Zero English without Vietnamese parenthetical.
+- [ ] No unsupported salary/employment claims.
+- [ ] Terminology consistent across all 23 slides.
+- [ ] Reading level comfortable for 13-year-old (max 18 words/sentence).
+- [ ] Every 3D label and tooltip is in Vietnamese.
+
+---
+
+# 13. DELIVERABLES
+
+```
+nghe-co-khi/
+├── index.html                           ← single-page app entry
+├── css/
+│   ├── reset.css
+│   ├── variables.css
+│   ├── typography.css
+│   ├── layout.css
+│   ├── components.css
+│   ├── slides.css
+│   └── animations.css
+├── js/
+│   ├── app.js
+│   ├── router.js
+│   ├── transitions.js
+│   ├── three-manager.js
+│   ├── scenes/ (22 scene modules)
+│   ├── utils/ (camera-rig, explode, labels, counter, materials, device-tier)
+│   └── data/ (slides-content.js, scene-configs.js)
+├── models/ (15+ GLB files, Draco compressed)
+├── images/ (20+ WebP photos + fallback PNGs)
+├── graphics/ (SVG diagrams)
+├── fonts/ (woff2 for offline fallback)
+├── sw.js                               ← service worker
+├── manifest.json                       ← PWA manifest
+├── reports/
+│   ├── 3d-assets.md                    ← model attribution
+│   ├── asset-sources.md                ← photo attribution
+│   ├── design-decisions.md             ← color, layout, motion rationale
+│   └── preview/ (23 PNGs + contact sheet)
+└── README.md                           ← setup, usage, deployment
+```
+
+**Deployment:** Works by:
+1. Opening `index.html` in a browser (no server needed for basic use)
+2. `python -m http.server` for full 3D model loading
+3. Deploying the folder to any static host (Vercel, Netlify, GitHub Pages)
+
+---
+
+# 14. ACCEPTANCE CRITERIA
+
+- [ ] **First impression:** "This is beautiful" — within 2 seconds of loading
+- [ ] **Playfulness:** At least 5 slides have hover/click micro-interactions that make students smile
+- [ ] **3D coverage:** 12+ slides feature real-time 3D content
+- [ ] **Showstopper scenes:** Exploded assembly (12), engine cutaway (14), robot pick-and-place (16), welding sparks (10), finale swirl (23) — all functional
+- [ ] **Object continuity:** Hero gear appears on slides 01, 03, 06, 20, 23
+- [ ] **Warm palette:** Every pixel feels warm. Zero cold-tone accidents.
+- [ ] **Vietnamese:** 100% correct diacritics, consistent terminology, age-appropriate
+- [ ] **Morph transitions:** 10+ slide pairs have smooth object-persistent transitions
+- [ ] **Interactive 3D:** At least 4 slides allow drag-to-rotate, click-to-label, or slider-to-control
+- [ ] **Performance:** 55+ FPS desktop, 30+ FPS tablet, PNG fallback mobile
+- [ ] **Navigation:** Keyboard, mouse, touch all work perfectly
+- [ ] **Offline:** Works after first load with no network
+- [ ] **Code quality:** Vanilla JS (no framework), clean modules, well-commented
+- [ ] **Deployable:** Works from `file://` or any static host
+
+### THE TEACHER TEST
+
+A Vietnamese teacher opens `index.html` in Chrome, presses `F` for fullscreen, and:
+
+1. **Slide 01 loads.** A golden gear catches warm light and rotates. The teacher's eyebrows rise.
+2. **They hover the gear.** It wobbles playfully. They smile.
+3. **They click through.** Gears morph into a career map. A CNC mill traces a path with tiny sparks. Welding particles spray across a dark screen.
+4. **Slide 12.** They click "Tháo rời." Parts fly apart with Vietnamese labels. They click "Lắp ráp." It reassembles. They laugh.
+5. **Slide 14.** An engine cutaway shows pistons pumping. They drag to rotate it. They whisper "ối trời."
+6. **Slide 16.** A robot arm picks and places a cube in warm lavender light. They watch the full cycle twice.
+7. **Slide 23.** All objects swirl together and settle into the original golden gear. The serif quote appears.
+
+The teacher closes the laptop, turns to a colleague, and says:
+
+> *"Em phải xem cái này. Đây không phải PowerPoint — đây là một trải nghiệm. Học sinh sẽ nhớ bài này mãi."*
+
+Translation: *"You have to see this. This isn't PowerPoint — it's an experience. Students will remember this lesson forever."*
+
+**If the teacher's first thought is "AI made this" or "just another slideshow" — the project has failed.**
+
+**Do not stop after the first build. Render, inspect, improve, verify. Then deliver.**
+````
+

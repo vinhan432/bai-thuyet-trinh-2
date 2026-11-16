@@ -1,0 +1,470 @@
+@import "tailwindcss";
+
+:root {
+  /* Surfaces — Golden Hour in a Clean Workshop */
+  --bg-cream: #FFF9F2;
+  --bg-linen: #F5EDE3;
+  --bg-peach: #FCEEE4;
+  --bg-card: #FFFFFF;
+  --bg-warm-dark: #3D3028;
+  --bg-warm-dark-alt: #4A3F35;
+
+  /* Text */
+  --text-heading: #2D2520;
+  --text-body: #5C534B;
+  --text-soft: #8A7F76;
+  --text-on-dark: #FFF5ED;
+  --text-on-dark-muted: #DECFC3;
+  --text-link: #D4734F;
+
+  /* Warm Accents */
+  --coral: #E87B5A;
+  --tangerine: #F2994A;
+  --honey: #EAB042;
+  --sage: #7DB58E;
+  --sky: #6AADCF;
+  --lavender: #A78EC4;
+  --rose: #D4918D;
+  --mint: #82C9B5;
+
+  /* Utility */
+  --border: rgba(45, 37, 32, 0.09);
+  --border-card: rgba(45, 37, 32, 0.08);
+  --shadow-sm: 0 2px 10px rgba(45, 37, 32, 0.06);
+  --shadow-md: 0 6px 24px rgba(45, 37, 32, 0.08);
+  --shadow-lg: 0 14px 44px rgba(45, 37, 32, 0.11);
+  --shadow-glow-coral: 0 8px 28px rgba(232, 123, 90, 0.28);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.22, 1.28, 0.36, 1);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--bg-cream);
+  color: var(--text-body);
+  font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Typography Hierarchy ─────────────────────────────────────────── */
+.t-hero {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: clamp(2.3rem, 4.4vw, 4.4rem);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.t-slide-title {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: clamp(1.7rem, 2.9vw, 2.85rem);
+  font-weight: 800;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.t-quote {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.5rem, 2.7vw, 2.55rem);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.34;
+  text-wrap: balance;
+}
+
+.t-eyebrow {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.t-stat {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.t-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Slide entrance transitions (compositor-only) ─────────────────── */
+@keyframes slideForwardIn {
+  from {
+    opacity: 0;
+    transform: translate3d(56px, 14px, 0) scale(0.97);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes slideBackwardIn {
+  from {
+    opacity: 0;
+    transform: translate3d(-56px, 14px, 0) scale(0.97);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes slideMorphIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0) scale(0.95);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes slideDarkRevealIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.94);
+    filter: brightness(0.6) saturate(1.4);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+@keyframes slideBounceIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes childCascadeIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes photoModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -12px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes accentPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+.anim-slide-forward {
+  animation: slideForwardIn 0.62s var(--ease-out) both;
+  will-change: transform, opacity, filter;
+}
+
+.anim-slide-backward {
+  animation: slideBackwardIn 0.62s var(--ease-out) both;
+  will-change: transform, opacity, filter;
+}
+
+.anim-slide-morph {
+  animation: slideMorphIn 0.7s var(--ease-out) both;
+  will-change: transform, opacity, filter;
+}
+
+.anim-slide-dark {
+  animation: slideDarkRevealIn 0.76s var(--ease-out) both;
+  will-change: transform, opacity, filter;
+}
+
+.anim-slide-bounce {
+  animation: slideBounceIn 0.66s var(--ease-spring) both;
+  will-change: transform, opacity;
+}
+
+.anim-photo-modal {
+  animation: photoModalIn 0.28s var(--ease-out) both;
+}
+
+.anim-toast {
+  animation: toastIn 0.34s var(--ease-spring) both;
+}
+
+.anim-accent-pulse {
+  animation: accentPulse 2.4s ease-in-out infinite;
+}
+
+.anim-stagger > * {
+  animation: childCascadeIn 0.52s var(--ease-out) both;
+}
+.anim-stagger > *:nth-child(1) { animation-delay: 40ms; }
+.anim-stagger > *:nth-child(2) { animation-delay: 90ms; }
+.anim-stagger > *:nth-child(3) { animation-delay: 140ms; }
+.anim-stagger > *:nth-child(4) { animation-delay: 190ms; }
+.anim-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.anim-stagger > *:nth-child(6) { animation-delay: 290ms; }
+.anim-stagger > *:nth-child(7) { animation-delay: 340ms; }
+.anim-stagger > *:nth-child(8) { animation-delay: 390ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-slide-forward,
+  .anim-slide-backward,
+  .anim-slide-morph,
+  .anim-slide-dark,
+  .anim-slide-bounce,
+  .anim-photo-modal,
+  .anim-toast,
+  .anim-accent-pulse,
+  .anim-stagger > * {
+    animation: none !important;
+  }
+}
+
+/* ── Custom warm range slider ─────────────────────────────────────── */
+input[type='range'].warm-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(45, 37, 32, 0.16);
+  outline: none;
+}
+
+/* Touch widths: keep the 6px track but give the control a 44px hit area. */
+@media (max-width: 767px) {
+  input[type='range'].warm-slider {
+    height: 44px;
+    padding: 19px 0;
+    background-clip: content-box;
+    box-sizing: border-box;
+  }
+}
+
+input[type='range'].warm-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--coral);
+  cursor: pointer;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(45, 37, 32, 0.25);
+  margin-top: 0;
+}
+
+input[type='range'].warm-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--coral);
+  cursor: pointer;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(45, 37, 32, 0.25);
+}
+
+input[type='range'].warm-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(45, 37, 32, 0.16);
+}
+
+/* ── 3D projected Vietnamese label ────────────────────────────────── */
+.label-3d-anchor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition: opacity 0.25s ease;
+}
+
+.label-3d-card {
+  transform: translate(-50%, -100%);
+  background: rgba(255, 255, 255, 0.97);
+  color: #2D2520;
+  border: 1px solid rgba(45, 37, 32, 0.15);
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-shadow: 0 10px 28px rgba(45, 37, 32, 0.16);
+  max-width: 268px;
+}
+
+/* ── Acrylic frames (no backdrop-filter: safe over WebGL) ─────────── */
+.acrylic-panel {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 252, 248, 0.9) 0%,
+    rgba(255, 247, 238, 0.82) 100%
+  );
+  border: 1.5px solid rgba(45, 37, 32, 0.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(45, 37, 32, 0.04),
+    0 20px 48px rgba(45, 37, 32, 0.11);
+}
+
+.acrylic-panel-dark {
+  background: linear-gradient(
+    135deg,
+    rgba(43, 33, 27, 0.9) 0%,
+    rgba(56, 44, 36, 0.82) 100%
+  );
+  border: 1.5px solid rgba(255, 245, 237, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 245, 237, 0.14),
+    0 20px 48px rgba(18, 12, 9, 0.34);
+}
+
+/* ── Card hover lift (shared across slide layouts) ────────────────── */
+.card-lift {
+  transition:
+    transform 0.22s var(--ease-out),
+    box-shadow 0.22s var(--ease-out),
+    border-color 0.22s var(--ease-out);
+}
+
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(45, 37, 32, 0.13);
+}
+
+/* ── Glass cards: a cleaner, brighter surface than flat white ─────── */
+.glass-card {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 250, 244, 0.94) 100%);
+  border: 1px solid rgba(45, 37, 32, 0.09);
+  box-shadow:
+    0 1px 2px rgba(45, 37, 32, 0.04),
+    0 8px 24px -8px rgba(45, 37, 32, 0.14);
+}
+
+.glass-card-dark {
+  background:
+    linear-gradient(160deg, rgba(58, 46, 38, 0.96) 0%, rgba(43, 33, 27, 0.94) 100%);
+  border: 1px solid rgba(255, 245, 237, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 245, 237, 0.08),
+    0 8px 24px -8px rgba(12, 8, 5, 0.5);
+}
+
+/* ── Accent bar on card left edge ─────────────────────────────────── */
+.card-accent {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-accent::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--card-accent, currentColor);
+  opacity: 0.9;
+}
+
+/* ── Model loading shimmer ────────────────────────────────────────── */
+@keyframes modelShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.model-loading {
+  background-image: linear-gradient(
+    100deg,
+    rgba(232, 123, 90, 0.06) 20%,
+    rgba(232, 123, 90, 0.16) 40%,
+    rgba(232, 123, 90, 0.06) 60%
+  );
+  background-size: 200% 100%;
+  animation: modelShimmer 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .model-loading {
+    animation: none;
+  }
+}
+
+/* ── Scrollable overlays on small screens ─────────────────────────── */
+.slide-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(45, 37, 32, 0.28) transparent;
+}
+
+.slide-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.slide-scroll::-webkit-scrollbar-thumb {
+  background: rgba(45, 37, 32, 0.22);
+  border-radius: 999px;
+}
+
+.slide-scroll-dark {
+  scrollbar-color: rgba(255, 245, 237, 0.28) transparent;
+}
+
+.slide-scroll-dark::-webkit-scrollbar-thumb {
+  background: rgba(255, 245, 237, 0.26);
+}
