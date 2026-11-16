@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { X } from 'lucide-react';
+import { X, Box } from 'lucide-react';
 import { ACCENT_HEX, SLIDES } from '../data/slides';
 import { SlideStage } from '../three/SlideStage';
 import { SceneClickResult, SceneControlState } from '../three/types';
+import { sceneUsesModels } from '../three/sceneModels';
 import { SlideOverlay } from './SlideOverlay';
 import { BottomDock } from './BottomDock';
 import { OverviewModal } from './OverviewModal';
@@ -270,16 +271,31 @@ export const PresentationDeck: React.FC = () => {
           {ACT_LABELS[currentSlide.act] ?? currentSlide.actTitle}
         </span>
 
-        <span
-          data-testid="slide-counter"
-          className={`t-mono font-bold px-3 py-1 rounded-full border ${
-            isDark
-              ? 'text-[#FFF5ED] bg-[#2B211B]/55 border-[#FFF5ED]/12'
-              : 'text-[#2D2520] bg-[#FFFFFF]/70 border-[#2D2520]/10'
-          }`}
-        >
-          {formatSlideCounter(slideIndex, SLIDES.length)}
-        </span>
+        <div className="flex items-center gap-2">
+          {sceneUsesModels(currentSlide.sceneId) && (
+            <span
+              className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] font-bold uppercase tracking-wider ${
+                isDark
+                  ? 'text-[#FFF5ED]/85 bg-[#2B211B]/55 border-[#FFF5ED]/12'
+                  : 'text-[#5C534B] bg-[#FFFFFF]/70 border-[#2D2520]/10'
+              }`}
+              title="Cảnh này có mô hình 3D thật — kéo để xoay"
+            >
+              <Box className="w-3.5 h-3.5" style={{ color: accentHex }} />
+              3D
+            </span>
+          )}
+          <span
+            data-testid="slide-counter"
+            className={`t-mono font-bold px-3 py-1 rounded-full border ${
+              isDark
+                ? 'text-[#FFF5ED] bg-[#2B211B]/55 border-[#FFF5ED]/12'
+                : 'text-[#2D2520] bg-[#FFFFFF]/70 border-[#2D2520]/10'
+            }`}
+          >
+            {formatSlideCounter(slideIndex, SLIDES.length)}
+          </span>
+        </div>
       </header>
 
       {/* Full-bleed 3D WebGL stage */}

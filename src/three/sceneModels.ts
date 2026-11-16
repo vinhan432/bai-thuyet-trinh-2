@@ -4,12 +4,10 @@ import { ModelId, preloadModels } from './modelLoader';
  * Which GLB models each 3D scene uses. Used to warm the next slide's models
  * so they are ready before the presenter arrives, without dumping the whole
  * library on the first page load.
- *
- * Slide 4 (`everyday-objects`) is deliberately absent: that scene stays
- * procedural by request.
  */
 const SCENE_MODELS: Record<string, ModelId[]> = {
   'bicycle-gear': ['bicycle'],
+  'everyday-objects': ['bicycle', 'ceiling-fan', 'hand-plane', 'hand-truck'],
   'maintenance-tools': [
     'adjustable-wrench',
     'oil-can',

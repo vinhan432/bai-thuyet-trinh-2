@@ -45,5 +45,7 @@ export interface SceneRuntime {
   update: (dt: number, elapsed: number, state: SceneControlState) => void;
   onObjectClick?: (obj: THREE.Object3D) => SceneClickResult | null;
   triggerWobble?: (obj: THREE.Object3D) => void;
+  /** Optional extra teardown (e.g. cancelling a pending model swap). */
+  cleanup?: () => void;
   dispose: () => void;
 }

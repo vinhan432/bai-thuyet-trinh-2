@@ -7,6 +7,7 @@ import { createMaterialBank, MaterialBank } from './materials';
 import { buildScenePart1 } from './modelsPart1';
 import { buildScenePart2 } from './modelsPart2';
 import { SceneClickResult, SceneControlState, SceneLabelAnchor, SceneRuntime } from './types';
+import { preloadSceneModels } from './sceneModels';
 import { dampValue } from '../utils/presentationLogic';
 
 interface SlideStageProps {
@@ -139,6 +140,7 @@ export const SlideStage: React.FC<SlideStageProps> = ({
 
   // ── Runtime cache: reuse a built scene instead of rebuilding geometry ──
   const disposeRuntime = (runtime: SceneRuntime) => {
+    runtime.cleanup?.();
     runtime.dispose();
   };
 
@@ -693,6 +695,15 @@ export const SlideStage: React.FC<SlideStageProps> = ({
     const controls = controlsRef.current;
     const renderer = rendererRef.current;
     if (!scene || !mats || !camera || !controls) return;
+
+    // Warm this scene's models plus its neighbours, so a forward or backward
+    // step finds them already in memory.
+    preloadSceneModels(slide.sceneId);
+    const idx = SLIDES.findIndex((s) => s.id === slide.id);
+    if (idx >= 0) {
+      if (SLIDES[idx + 1]) preloadSceneModels(SLIDES[idx + 1].sceneId);
+      if (SLIDES[idx - 1]) preloadSceneModels(SLIDES[idx - 1].sceneId);
+    }
 
     const hadPrev = Boolean(activeRuntimeRef.current);
     const tr = transitionStateRef.current;

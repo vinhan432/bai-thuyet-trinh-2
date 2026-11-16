@@ -230,6 +230,18 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
       root.add(assembly, shadow);
       interactables.push(assembly);
 
+      // Swap in the real bicycle once it loads.
+      let modelRoot: THREE.Group | null = null;
+      const cancelModelSwap = mountModelWhenReady('bicycle', assembly, {
+        placeholder,
+        onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+        onReady: (model) => {
+          modelRoot = model;
+          model.rotation.y = Math.PI / 2;
+          fitModel(model, 3.0);
+        },
+      });
+
       let px = 0;
       let py = 0;
       return {
@@ -246,6 +258,8 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
           py = dampValue(py, state.pointerNDC.y * 0.25, 5, dt);
           assembly.rotation.y = -0.22 + px;
           assembly.rotation.x = 0.12 - py;
+
+          if (modelRoot) return;
 
           const rot = elapsed * 0.55;
           chainring.rotation.z = rot;
@@ -266,6 +280,7 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
           }
           chainInst.instanceMatrix.needsUpdate = true;
         },
+        cleanup: cancelModelSwap,
         dispose: () => disposeObjectTree(root, shared),
       };
     }
@@ -453,8 +468,25 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
     // SLIDE 04: 4 Everyday Mechanical Objects Carousel
     // ══════════════════════════════════════════════════════════════
     case 'everyday-objects': {
-      // 1. Bike sprocket
-      const bikeObj = new THREE.Group();
+      // Four everyday objects, each a real GLB with a procedural stand-in so
+      // the carousel is never empty while the models stream in.
+      //
+      // Each object is an outer holder (which the carousel animates: bob,
+      // select-scale) wrapping an inner holder (which owns the model and its
+      // fitted scale). Keeping them separate stops the select animation from
+      // overwriting the fit.
+      const cleanups: (() => void)[] = [];
+
+      const makeSlot = (x: number, y: number, z: number) => {
+        const outer = new THREE.Group();
+        outer.position.set(x, y, z);
+        const inner = new THREE.Group();
+        outer.add(inner);
+        return { outer, inner };
+      };
+
+      // 1. Bicycle
+      const bikeSlot = makeSlot(-2.2, 0.15, 0.35);
       const bikeRing = createCompositeSpurGear(mats, {
         outerRadius: 0.72,
         teeth: 18,
@@ -463,11 +495,18 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
       });
       const bikeCrank = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.8, 0.08), mats.warmMetal);
       bikeCrank.position.set(0, -0.35, 0.1);
-      bikeObj.add(bikeRing, bikeCrank);
-      bikeObj.position.set(-2.2, 0.15, 0.35);
+      bikeSlot.inner.add(bikeRing, bikeCrank);
+      cleanups.push(
+        mountModelWhenReady('bicycle', bikeSlot.inner, {
+          onReady: (model) => {
+            model.rotation.y = Math.PI / 2;
+            fitModel(model, 1.9);
+          },
+        }),
+      );
 
-      // 2. Electric Fan (base + neck + guard + 4 blades)
-      const fanObj = new THREE.Group();
+      // 2. Ceiling fan
+      const fanSlot = makeSlot(-0.72, 0.25, -0.35);
       const fanBase = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.52, 0.1, 24), makeSoftPolymer(0x6aadcf));
       fanBase.position.y = -0.65;
       const fanNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.7, 16), mats.warmMetal);
@@ -488,11 +527,15 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
         blade.rotation.y = 0.35;
         bladeHub.add(blade);
       }
-      fanObj.add(fanBase, fanNeck, fanMotor, fanGuard, bladeHub);
-      fanObj.position.set(-0.72, 0.25, -0.35);
+      fanSlot.inner.add(fanBase, fanNeck, fanMotor, fanGuard, bladeHub);
+      cleanups.push(
+        mountModelWhenReady('ceiling-fan', fanSlot.inner, {
+          onReady: (model) => fitModelOnGround(model, 1.7),
+        }),
+      );
 
-      // 3. Car Gauge Cluster
-      const gaugeObj = new THREE.Group();
+      // 3. Hand plane
+      const planeSlot = makeSlot(0.76, 0.25, 0.35);
       const bezel = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.7, 0.2, 32), mats.darkIron);
       bezel.rotation.x = Math.PI / 2;
       const rim = new THREE.Mesh(new THREE.TorusGeometry(0.64, 0.05, 16, 32), mats.goldenMetal);
@@ -508,11 +551,15 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
       needle.position.set(0, 0.14, 0.14);
       const needlePivot = new THREE.Group();
       needlePivot.add(needle);
-      gaugeObj.add(bezel, rim, face, needlePivot);
-      gaugeObj.position.set(0.76, 0.25, 0.35);
+      planeSlot.inner.add(bezel, rim, face, needlePivot);
+      cleanups.push(
+        mountModelWhenReady('hand-plane', planeSlot.inner, {
+          onReady: (model) => fitModelOnGround(model, 1.5),
+        }),
+      );
 
-      // 4. Kitchen Mixer
-      const mixerObj = new THREE.Group();
+      // 4. Hand truck
+      const truckSlot = makeSlot(2.25, 0.2, -0.25);
       const mixerBase = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.14, 0.65), makeSoftPolymer(0xe87b5a));
       mixerBase.position.y = -0.58;
       const mixerCol = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.75, 0.3), makeSoftPolymer(0xe87b5a));
@@ -531,10 +578,14 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
       bowl.position.set(0.16, 0, 0);
       const beater = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.42, 12), mats.warmMetal);
       beater.position.set(0.16, -0.04, 0);
-      mixerObj.add(mixerBase, mixerCol, mixerHead, bowl, beater);
-      mixerObj.position.set(2.25, 0.2, -0.25);
+      truckSlot.inner.add(mixerBase, mixerCol, mixerHead, bowl, beater);
+      cleanups.push(
+        mountModelWhenReady('hand-truck', truckSlot.inner, {
+          onReady: (model) => fitModelOnGround(model, 1.8),
+        }),
+      );
 
-      const objs = [bikeObj, fanObj, gaugeObj, mixerObj];
+      const objs = [bikeSlot.outer, fanSlot.outer, planeSlot.outer, truckSlot.outer];
       const basePositions = objs.map((o) => o.position.clone());
       const shadow = createContactShadowDisc(mats.contactShadowMat, 3.6, -1.25);
       root.add(...objs, shadow);
@@ -543,8 +594,8 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
       const descriptions = [
         { title: 'Xe đạp', description: 'Giao thông — Xích, líp và phanh truyền lực chân thành chuyển động.' },
         { title: 'Quạt điện', description: 'Gia dụng — Động cơ quay cánh quạt tạo làn gió mát mẻ.' },
-        { title: 'Đồng hồ ô tô', description: 'Vận tải — Hàng nghìn chi tiết cơ khí phối hợp nhịp nhàng.' },
-        { title: 'Máy xay bếp', description: 'Chế biến — Trục quay và hộp số thu nhỏ gọn gàng.' },
+        { title: 'Bào tay', description: 'Chế tác — Lưỡi bào cắt lớp gỗ mỏng, chỉnh bằng tay.' },
+        { title: 'Xe đẩy hàng', description: 'Kho vận — Khung thép và bánh xe chịu tải nặng.' },
       ];
 
       return {
@@ -557,7 +608,9 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
         orbitSpeed: 0,
         darkAtmosphere: false,
         onObjectClick: (clicked) => {
-          const idx = objs.findIndex((o) => o === clicked || o.children.includes(clicked) || clicked.parent === o);
+          const idx = objs.findIndex(
+            (o) => o === clicked || o.children.includes(clicked) || clicked.parent === o,
+          );
           if (idx >= 0) {
             return { ...descriptions[idx], selectedIndex: idx };
           }
@@ -580,6 +633,7 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
             o.rotation.y = Math.sin(elapsed * 0.6 + i) * 0.25;
           });
         },
+        cleanup: () => cleanups.forEach((c) => c()),
         dispose: () => disposeObjectTree(root, shared),
       };
     }
@@ -895,6 +949,60 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
       const shadow = createContactShadowDisc(mats.contactShadowMat, 3.6, -1.05);
       root.add(latheGroup, shadow);
 
+      // Hand tools on the bench beside the lathe, plus a drill press at the
+      // far end of the shop floor.
+      const latheBench = new THREE.Group();
+      latheBench.position.set(0.6, -0.85, 1.5);
+      const cleanups: (() => void)[] = [];
+
+      const drillHolder = new THREE.Group();
+      drillHolder.position.set(-0.7, 0, 0);
+      const drillPlaceholder = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.3, 0.3), mats.darkIron);
+      drillHolder.add(drillPlaceholder);
+      latheBench.add(drillHolder);
+      cleanups.push(
+        mountModelWhenReady('drill', drillHolder, {
+          placeholder: drillPlaceholder,
+          onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+          onReady: (model) => {
+            fitModelOnGround(model, 1.0);
+            model.rotation.z = Math.PI / 2;
+          },
+        }),
+      );
+
+      const wrenchHolder = new THREE.Group();
+      wrenchHolder.position.set(0.5, 0, 0);
+      const wrenchPlaceholder = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.12, 0.12), mats.chromeAccent);
+      wrenchHolder.add(wrenchPlaceholder);
+      latheBench.add(wrenchHolder);
+      cleanups.push(
+        mountModelWhenReady('wrench', wrenchHolder, {
+          placeholder: wrenchPlaceholder,
+          onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+          onReady: (model) => {
+            fitModelOnGround(model, 0.95);
+            model.rotation.z = Math.PI / 2;
+          },
+        }),
+      );
+
+      root.add(latheBench);
+
+      const pressHolder = new THREE.Group();
+      pressHolder.position.set(-3.1, -0.95, -1.5);
+      pressHolder.rotation.y = 0.55;
+      const pressPlaceholder = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.3, 0.5), mats.warmMetal);
+      pressHolder.add(pressPlaceholder);
+      root.add(pressHolder);
+      cleanups.push(
+        mountModelWhenReady('drill-press', pressHolder, {
+          placeholder: pressPlaceholder,
+          onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+          onReady: (model) => fitModelOnGround(model, 2.0),
+        }),
+      );
+
       return {
         root,
         interactables,
@@ -926,6 +1034,7 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
           }
           chips.instanceMatrix.needsUpdate = true;
         },
+        cleanup: () => cleanups.forEach((c) => c()),
         dispose: () => disposeObjectTree(root, shared),
       };
     }
@@ -1017,6 +1126,53 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
       root.add(cnc, shadow);
       interactables.push(spindleHead);
 
+      // Bench tools beside the machine, clear of its body (x -0.7..2.8), plus
+      // an older drill press at the back of the shop.
+      const benchCluster = new THREE.Group();
+      benchCluster.position.set(-3.0, -0.62, 1.35);
+      const cleanups: (() => void)[] = [];
+
+      const viceHolder = new THREE.Group();
+      const vicePlaceholder = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.4, 0.5), mats.darkIron);
+      viceHolder.add(vicePlaceholder);
+      benchCluster.add(viceHolder);
+      cleanups.push(
+        mountModelWhenReady('bench-vice', viceHolder, {
+          placeholder: vicePlaceholder,
+          onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+          onReady: (model) => fitModelOnGround(model, 1.2),
+        }),
+      );
+
+      const tapeHolder = new THREE.Group();
+      tapeHolder.position.set(0.95, 0, 0.35);
+      const tapePlaceholder = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.18), mats.matteSteel);
+      tapeHolder.add(tapePlaceholder);
+      benchCluster.add(tapeHolder);
+      cleanups.push(
+        mountModelWhenReady('measuring-tape', tapeHolder, {
+          placeholder: tapePlaceholder,
+          onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+          onReady: (model) => fitModelOnGround(model, 0.75),
+        }),
+      );
+
+      root.add(benchCluster);
+
+      const pressHolder = new THREE.Group();
+      pressHolder.position.set(-3.0, -0.95, -1.6);
+      pressHolder.rotation.y = 0.5;
+      const pressPlaceholder = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.2, 0.5), mats.warmMetal);
+      pressHolder.add(pressPlaceholder);
+      root.add(pressHolder);
+      cleanups.push(
+        mountModelWhenReady('old-drill-press', pressHolder, {
+          placeholder: pressPlaceholder,
+          onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+          onReady: (model) => fitModelOnGround(model, 1.9),
+        }),
+      );
+
       labelAnchors.push(
         {
           id: 'axis_x',
@@ -1070,6 +1226,7 @@ export function buildScenePart1(sceneId: string, mats: MaterialBank): SceneRunti
           axesGroup.visible = state.cncAxesVisible;
           axesGroup.scale.setScalar(state.cncAxesVisible ? 1.15 : 0.01);
         },
+        cleanup: () => cleanups.forEach((c) => c()),
         dispose: () => disposeObjectTree(root, shared),
       };
     }

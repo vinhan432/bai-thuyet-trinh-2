@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { MaterialBank, createContactShadowDisc, makeSoftPolymer } from './materials';
 import { createCompositeSpurGear, disposeObjectTree } from './gearFactory';
+import { mountModelWhenReady, fitModel, fitModelOnGround, ModelId } from './modelLoader';
 import { SceneRuntime, SceneLabelAnchor } from './types';
 import { ENGINE_PARTS } from '../data/slides';
 import { computeCaliperMm, computeV4PistonOffsets, dampValue } from '../utils/presentationLogic';
@@ -51,11 +52,13 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
     // SLIDE 13: Maintenance Technician (3 Tool Vignettes)
     // ══════════════════════════════════════════════════════════════
     case 'maintenance-tools': {
-      // Left: Wrench + bolt
-      const wrench = createWrenchGroup(mats);
-      wrench.position.set(-2.3, 0.45, 0);
+      // Left: adjustable wrench — real model, procedural stand-in until loaded.
+      const wrenchHolder = new THREE.Group();
+      wrenchHolder.position.set(-2.3, 0.45, 0);
+      const wrenchPlaceholder = createWrenchGroup(mats);
+      wrenchHolder.add(wrenchPlaceholder);
 
-      // Center: Diagnostic gear pulsing healthy sage -> amber
+      // Center: diagnostic gear pulsing healthy sage -> amber
       const diagGear = createCompositeSpurGear(mats, {
         outerRadius: 0.78,
         innerRadius: 0.22,
@@ -66,8 +69,10 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
       });
       diagGear.position.set(0, 0.45, 0);
 
-      // Right: Copper Oil Can (LatheGeometry + TubeGeometry spout)
-      const oilCan = new THREE.Group();
+      // Right: oil can — real model, procedural stand-in until loaded.
+      const oilHolder = new THREE.Group();
+      oilHolder.position.set(2.3, 0.45, 0);
+      const oilPlaceholder = new THREE.Group();
       const canPts = [
         new THREE.Vector2(0, -0.45),
         new THREE.Vector2(0.45, -0.45),
@@ -86,11 +91,58 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
       const handle = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.035, 8, 20, Math.PI), mats.darkIron);
       handle.position.set(0.36, 0.05, 0);
       handle.rotation.z = -Math.PI / 2;
-      oilCan.add(canBody, spout, handle);
-      oilCan.position.set(2.3, 0.45, 0);
+      oilPlaceholder.add(canBody, spout, handle);
+      oilHolder.add(oilPlaceholder);
+
+      const cleanups: (() => void)[] = [];
+      cleanups.push(
+        mountModelWhenReady('adjustable-wrench', wrenchHolder, {
+          placeholder: wrenchPlaceholder,
+          onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+          onReady: (model) => {
+            fitModel(model, 1.8);
+            model.rotation.z = Math.PI / 2;
+          },
+        }),
+      );
+      cleanups.push(
+        mountModelWhenReady('oil-can', oilHolder, {
+          placeholder: oilPlaceholder,
+          onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+          onReady: (model) => fitModelOnGround(model, 1.6),
+        }),
+      );
+
+      // A second row of maintenance tools behind the main three.
+      const backRow = new THREE.Group();
+      backRow.position.set(0, -0.55, -1.35);
+      const BACK_TOOLS: { id: ModelId; x: number; size: number }[] = [
+        { id: 'sledgehammer', x: -2.4, size: 1.5 },
+        { id: 'crowbar', x: -1.2, size: 1.5 },
+        { id: 'handsaw', x: 1.2, size: 1.6 },
+        { id: 'tool-chest', x: 2.5, size: 1.1 },
+      ];
+      for (const bt of BACK_TOOLS) {
+        const holder = new THREE.Group();
+        holder.position.set(bt.x, 0, 0);
+        const ph = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.3), mats.matteSteel);
+        holder.add(ph);
+        backRow.add(holder);
+        cleanups.push(
+          mountModelWhenReady(bt.id, holder, {
+            placeholder: ph,
+            onPlaceholderRemoved: (p) => disposeObjectTree(p, shared),
+            onReady: (model) => {
+              fitModel(model, bt.size);
+              model.rotation.z = Math.PI / 2;
+            },
+          }),
+        );
+      }
+      root.add(backRow);
 
       const shadow = createContactShadowDisc(mats.contactShadowMat, 3.8, -0.9);
-      root.add(wrench, diagGear, oilCan, shadow);
+      root.add(wrenchHolder, diagGear, oilHolder, shadow);
 
       return {
         root,
@@ -102,11 +154,16 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
         orbitSpeed: 0,
         darkAtmosphere: false,
         update: (_dt, elapsed) => {
-          wrench.rotation.y = elapsed * 0.7;
-          wrench.rotation.z = Math.sin(elapsed * 1.4) * 0.22;
+          wrenchHolder.rotation.y = elapsed * 0.5;
+          wrenchHolder.rotation.z = Math.sin(elapsed * 1.4) * 0.14;
           diagGear.rotation.z = elapsed * 0.65;
-          oilCan.rotation.z = 0.2 + Math.sin(elapsed * 1.8) * 0.22;
+          oilHolder.rotation.y = elapsed * 0.4;
+          oilHolder.rotation.z = 0.2 + Math.sin(elapsed * 1.8) * 0.14;
+          backRow.children.forEach((h, i) => {
+            h.rotation.y = Math.sin(elapsed * 0.5 + i) * 0.3;
+          });
         },
+        cleanup: () => cleanups.forEach((c) => c()),
         dispose: () => disposeObjectTree(root, shared),
       };
     }
@@ -551,10 +608,12 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
       topGear.position.set(1.35, 0.92, 0);
       topGear.rotation.x = 0.25;
 
-      // PLC Board Bottom
+      // PLC Board Bottom — procedural placeholder, replaced by the real
+      // Arduino Mega GLB once it loads.
       const plcGroup = new THREE.Group();
       plcGroup.position.set(1.35, -0.88, 0);
       plcGroup.rotation.x = -0.35;
+      const placeholder = new THREE.Group();
       const pcb = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.1, 1.3), makeSoftPolymer(0x2d6a56, 0.55));
       const cpu = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.14, 0.55), mats.darkIron);
       cpu.position.y = 0.08;
@@ -563,9 +622,56 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
         const led = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 10), mats.glowingMint);
         led.position.set(-0.7 + i * 0.28, 0.09, 0.44);
         leds.push(led);
-        plcGroup.add(led);
+        placeholder.add(led);
       }
-      plcGroup.add(pcb, cpu);
+      placeholder.add(pcb, cpu);
+      plcGroup.add(placeholder);
+
+      let boardRoot: THREE.Group | null = null;
+      const cancelBoardSwap = mountModelWhenReady('arduino-mega', plcGroup, {
+        placeholder,
+        onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+        onReady: (model) => {
+          boardRoot = model;
+          fitModel(model, 2.2);
+        },
+      });
+
+      // Real electronics on the left: a circuit board and a service laptop.
+      const leftCluster = new THREE.Group();
+      leftCluster.position.set(-1.75, -0.05, -0.55);
+      const cleanups: (() => void)[] = [cancelBoardSwap];
+
+      const boardHolder = new THREE.Group();
+      boardHolder.position.set(0, -0.6, 0.35);
+      boardHolder.rotation.x = -0.5;
+      const boardPlaceholder = new THREE.Mesh(
+        new THREE.BoxGeometry(1.5, 0.08, 1.0),
+        makeSoftPolymer(0x2d6a56, 0.55),
+      );
+      boardHolder.add(boardPlaceholder);
+      leftCluster.add(boardHolder);
+      cleanups.push(
+        mountModelWhenReady('circuit-board', boardHolder, {
+          placeholder: boardPlaceholder,
+          onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+          onReady: (model) => fitModel(model, 1.6),
+        }),
+      );
+
+      const laptopHolder = new THREE.Group();
+      laptopHolder.position.set(0.1, 0.5, -0.45);
+      laptopHolder.rotation.y = 0.6;
+      const laptopPlaceholder = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.06, 0.62), mats.matteSteel);
+      laptopHolder.add(laptopPlaceholder);
+      leftCluster.add(laptopHolder);
+      cleanups.push(
+        mountModelWhenReady('laptop', laptopHolder, {
+          placeholder: laptopPlaceholder,
+          onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+          onReady: (model) => fitModel(model, 1.35),
+        }),
+      );
 
       // Connecting glowing energy conduit + traveling pulses (InstancedMesh)
       const pulseCount = 24;
@@ -573,7 +679,7 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
       const pulses = new THREE.InstancedMesh(pulseGeo, mats.glowingMint, pulseCount);
       pulses.frustumCulled = false;
 
-      root.add(topGear, plcGroup, pulses);
+      root.add(topGear, plcGroup, pulses, leftCluster);
 
       return {
         root,
@@ -589,24 +695,29 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
           topGear.rotation.z = elapsed * 0.7 * boost;
           plcGroup.rotation.y = Math.sin(elapsed * 0.5) * 0.15;
 
-          leds.forEach((l, i) => {
-            const on = Math.sin(elapsed * 5 + i * 0.9) > 0;
-            l.scale.setScalar(on ? 1.2 : 0.65);
-          });
+          if (!boardRoot) {
+            leds.forEach((l, i) => {
+              const on = Math.sin(elapsed * 5 + i * 0.9) > 0;
+              l.scale.setScalar(on ? 1.2 : 0.65);
+            });
+          }
 
           for (let i = 0; i < pulseCount; i++) {
             const t = (elapsed * 0.55 + i / pulseCount) % 1;
+            // The stream runs up the right-hand column, in the gap between the
+            // board and the gear, so it never crosses either.
             _obj.position.set(
-              1.35 + Math.sin(t * Math.PI * 2) * 0.24,
-              -0.75 + t * 1.55,
-              Math.cos(t * Math.PI * 2) * 0.24,
+              1.35 + Math.sin(t * Math.PI * 2) * 0.2,
+              -0.36 + t * 0.14,
+              Math.cos(t * Math.PI * 2) * 0.2,
             );
-            _obj.scale.setScalar(0.7 + Math.sin(t * Math.PI) * 0.6);
+            _obj.scale.setScalar(0.55 + Math.sin(t * Math.PI) * 0.45);
             _obj.updateMatrix();
             pulses.setMatrixAt(i, _obj.matrix);
           }
           pulses.instanceMatrix.needsUpdate = true;
         },
+        cleanup: () => cleanups.forEach((c) => c()),
         dispose: () => disposeObjectTree(root, shared),
       };
     }
@@ -748,6 +859,48 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
       });
 
       root.add(stations, floor, gantry);
+
+      // Real industrial equipment around the perimeter, clear of the station
+      // grid. Each starts as a simple block and swaps to its GLB when loaded.
+      const FLOOR_Y = -1.08;
+      const EQUIPMENT: {
+        id: ModelId;
+        pos: [number, number, number];
+        size: number;
+        rotY?: number;
+        mounted?: boolean;
+      }[] = [
+        { id: 'generator', pos: [-3.6, FLOOR_Y, 2.6], size: 1.4, rotY: 0.5 },
+        { id: 'power-box', pos: [3.7, FLOOR_Y, 2.4], size: 1.5, rotY: -0.6 },
+        { id: 'industrial-pipes', pos: [-3.8, FLOOR_Y, -2.7], size: 2.0, rotY: 1.1 },
+        { id: 'tool-chest', pos: [3.6, FLOOR_Y, -2.6], size: 1.1, rotY: 0.3 },
+        { id: 'security-camera', pos: [-2.9, 1.05, 1.1], size: 0.7, rotY: 0.9, mounted: true },
+        { id: 'ceiling-fan', pos: [0, 1.45, -0.2], size: 1.5, rotY: 0, mounted: true },
+      ];
+
+      const cleanups: (() => void)[] = [];
+      for (const eq of EQUIPMENT) {
+        const holder = new THREE.Group();
+        holder.position.set(...eq.pos);
+        holder.rotation.y = eq.rotY ?? 0;
+        const placeholder = new THREE.Mesh(
+          new THREE.BoxGeometry(eq.size * 0.7, eq.size * 0.5, eq.size * 0.7),
+          mats.darkIron,
+        );
+        holder.add(placeholder);
+        root.add(holder);
+        cleanups.push(
+          mountModelWhenReady(eq.id, holder, {
+            placeholder,
+            onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+            onReady: (model) => {
+              if (eq.mounted) fitModel(model, eq.size);
+              else fitModelOnGround(model, eq.size);
+            },
+          }),
+        );
+      }
+
       return {
         root,
         interactables,
@@ -760,6 +913,7 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
         update: (_dt, elapsed) => {
           root.rotation.y = Math.sin(elapsed * 0.2) * 0.08;
         },
+        cleanup: () => cleanups.forEach((c) => c()),
         dispose: () => disposeObjectTree(root, shared),
       };
     }
@@ -771,25 +925,108 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
       const toolRing = new THREE.Group();
       const items: THREE.Object3D[] = [];
 
-      // 1. CAD wireframe cube
-      const t1 = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.65, 0.65), mats.blueprintWire);
-      // 2. CNC endmill
-      const t2 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.14, 0.9, 12), mats.goldenMetal);
-      // 3. Caliper miniature
-      const t3 = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.18, 0.1), mats.chromeAccent);
-      // 4. Robot gripper
-      const t4 = new THREE.Mesh(new THREE.OctahedronGeometry(0.42, 0), makeSoftPolymer(0xa78ec4));
-      // 5. Wrench
-      const t5 = createWrenchGroup(mats);
-      t5.scale.setScalar(0.62);
-      // 6. Hero Gear callback
-      const t6 = createCompositeSpurGear(mats, { outerRadius: 0.55, teeth: 14, thickness: 0.18, spokes: 4 });
+      // Nine real tools from the model library on a slow turntable. Each slot
+      // starts with a procedural stand-in so the ring is never empty.
+      const TOOL_SLOTS: { id: ModelId; placeholder: () => THREE.Object3D; size: number }[] = [
+        {
+          id: 'wrench',
+          placeholder: () => {
+            const g = createWrenchGroup(mats);
+            g.scale.setScalar(0.62);
+            return g;
+          },
+          size: 1.5,
+        },
+        {
+          id: 'drill',
+          placeholder: () => new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.14, 0.9, 12), mats.goldenMetal),
+          size: 1.5,
+        },
+        {
+          id: 'screwdriver',
+          placeholder: () => new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.18, 0.1), mats.chromeAccent),
+          size: 1.5,
+        },
+        {
+          id: 'hammer',
+          placeholder: () => new THREE.Mesh(new THREE.OctahedronGeometry(0.42, 0), makeSoftPolymer(0xa78ec4)),
+          size: 1.4,
+        },
+        {
+          id: 'measuring-tape',
+          placeholder: () => new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.22), mats.matteSteel),
+          size: 1.3,
+        },
+        {
+          id: 'bench-vice',
+          placeholder: () =>
+            createCompositeSpurGear(mats, { outerRadius: 0.55, teeth: 14, thickness: 0.18, spokes: 4 }),
+          size: 1.5,
+        },
+        {
+          id: 'handsaw',
+          placeholder: () => new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.3), mats.warmMetal),
+          size: 1.6,
+        },
+        {
+          id: 'bolt-cutters',
+          placeholder: () => new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.14, 0.14), mats.darkIron),
+          size: 1.5,
+        },
+        {
+          id: 'pipe-wrench',
+          placeholder: () => new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.16, 0.16), mats.chromeAccent),
+          size: 1.5,
+        },
+      ];
 
-      items.push(t1, t2, t3, t4, t5, t6);
-      items.forEach((item, i) => {
-        const ang = (i / 6) * Math.PI * 2;
-        item.position.set(Math.cos(ang) * 2.25, 0.65, Math.sin(ang) * 1.45);
-        toolRing.add(item);
+      const TOOL_LABELS: Record<string, string> = {
+        wrench: 'Cờ-lê',
+        drill: 'Máy khoan',
+        screwdriver: 'Tuốc-nơ-vít',
+        hammer: 'Búa nguội',
+        'measuring-tape': 'Thước cuộn',
+        'bench-vice': 'Ê-tô',
+        handsaw: 'Cưa tay',
+        'bolt-cutters': 'Kìm cắt',
+        'pipe-wrench': 'Cờ-lê ống',
+      };
+
+      const cleanups: (() => void)[] = [];
+      const slotCount = TOOL_SLOTS.length;
+      // A true circle at this radius keeps the projected labels from colliding.
+      const ringRadius = 3.5;
+
+      TOOL_SLOTS.forEach((slot, i) => {
+        const holder = new THREE.Group();
+        const ang = (i / slotCount) * Math.PI * 2;
+        holder.position.set(Math.cos(ang) * ringRadius, 0.55, Math.sin(ang) * ringRadius);
+        holder.userData.baseY = holder.position.y;
+
+        const placeholder = slot.placeholder();
+        holder.add(placeholder);
+        toolRing.add(holder);
+        items.push(holder);
+        interactables.push(holder);
+
+        labelAnchors.push({
+          id: `tool_${slot.id}`,
+          object: holder,
+          offset: new THREE.Vector3(0, 1.05, 0),
+          title: TOOL_LABELS[slot.id] ?? slot.id,
+          description: '',
+        });
+
+        cleanups.push(
+          mountModelWhenReady(slot.id, holder, {
+            placeholder,
+            onPlaceholderRemoved: (ph) => disposeObjectTree(ph, shared),
+            onReady: (model) => {
+              fitModel(model, slot.size);
+              model.rotation.x = -Math.PI / 2;
+            },
+          }),
+        );
       });
 
       const shadow = createContactShadowDisc(mats.contactShadowMat, 3.6, -1.0);
@@ -798,18 +1035,19 @@ export function buildScenePart2(sceneId: string, mats: MaterialBank): SceneRunti
         root,
         interactables,
         labelAnchors,
-        cameraPos: [0, 1.55, 5.8],
-        cameraTarget: [0, 0.2, 0],
+        cameraPos: [0, 3.6, 7.6],
+        cameraTarget: [0, 0.35, 0],
         autoOrbit: false,
         orbitSpeed: 0,
         darkAtmosphere: false,
         update: (_dt, elapsed) => {
           toolRing.rotation.y = elapsed * 0.22;
           items.forEach((it, i) => {
-            it.rotation.y = elapsed * (0.7 + i * 0.1);
-            it.position.y = 0.72 + Math.sin(elapsed * 1.6 + i) * 0.08;
+            it.position.y = it.userData.baseY + Math.sin(elapsed * 1.6 + i) * 0.09;
+            it.rotation.y = elapsed * (0.2 + i * 0.03);
           });
         },
+        cleanup: () => cleanups.forEach((c) => c()),
         dispose: () => disposeObjectTree(root, shared),
       };
     }
